@@ -1,0 +1,145 @@
+     <!-- Booking Edit Modal -->
+<!--div id="fullCalModal" class="modal fade" ng-controller="upcomingBookingController" >
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" -->
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" ng-click="cancel()"><span aria-hidden="true">&times;</span></button>
+                <h4 id="modalTitle" class="modal-title">{{booking.pickupAddress + ' to ' + booking.destination}}</h4>
+            </div>
+            <div id="modalBody" class="modal-body" ng-controller="upcomingBookingController">
+                  <div class="hnpcontainer-md">
+
+                          <div class="hnpfields-md">
+                              <div class="row">
+                              <div class="col-md-8" >
+                                      <div class="row">
+                                           <div class="col-md-8" id="key"><div class=" text-left pull-bottom"><h3 id="upcmg-book-dest">Booking ID: {{booking.id}}</h3></div></div>
+                                           <div class="col-md-4"><span class="pull-right"><button type="submit" class="btn-md btn-success pull-left active" id="ongng-car-sts">{{booking.status}} </button></span></div>
+                                      </div>
+                                      <div class="row">
+                                      <hr>
+                                            <table class="table table-condensed">
+                                              <thead class="value-md">
+                                                <tr>
+                                                  <th class="text-center col-md-2"></th>
+                                                  <th class="text-center col-md-6">Address</th>
+                                                  <th class="text-center col-md-1">Date</th>
+                                                  <th class="text-center col-md-2">Time</th>
+                                                </tr>
+                                              </thead>
+                                              <tbody class="value-md">
+                                                <tr>
+                                                  <td id="driver-date">Pickup</td>
+                                                  <td id="driver-dest" ><input type="text" class="form-control value" id="em-pickup-address" placeholder="Address" required="required" ng-model="booking.pickupAddress" /></td>
+                                                  <td id="driver-book-kms"><input type="date" class="form-control value" id="em-pickup-date" placeholder="Date" required="required" ng-model="booking.refPickupDate" /></td>
+                                                  <td id="driver"><input type="text" class="form-control value timepicker" id="em-pickup-time" placeholder="09:30" required="required" ng-model="booking.eventTime" /></td>
+                                                </tr>
+                                               <tr>
+                                                  <td id="driver-date">Destination</td>
+                                                  <td id="driver-dest"><input type="text" class="form-control value" id="em-destination" placeholder="Address" required="required" ng-model="booking.destination" /></td>
+                                                  <td id="driver-book-kms"></td>
+                                                  <td id="driver"><input type="text" class="form-control value timepicker" id="em-dest1-time" placeholder="16:30" required="required" ng-model="booking.destination1Time" /></td>
+                                                </tr>
+                                                <tr>
+                                                  <td id="driver-date">Destination2</td>
+                                                  <td id="driver-dest"></td>
+                                                  <td id="driver-book-kms"></td>
+                                                  <td id="driver"><input type="text" class="form-control value timepicker" id="em-dest2-time" placeholder="17:30" required="required" ng-model="booking.destination2Time" /></td>
+                                                </tr>
+                                                <tr>
+                                                  <td id="driver-date">Drop Off</td>
+                                                  <td id="driver-dest"></td>
+                                                  <td id="driver-book-kms"><input type="date" class="form-control value" id="em-dropoff-date" placeholder="Date" required="required" ng-model="booking.repDropOffDate" /></td>
+                                                  <td id="driver"><input type="text" class="form-control value timepicker" id="em-dropoff-time" placeholder="18:30" required="required" ng-model="booking.dropOffTime" /></td>
+                                                </tr>
+                                              </tbody>
+                                            </table>
+                                      </div>
+                                      <div class="row">
+                                            <hr>
+                                            <div class="row">
+                                              <div class="col-md-6 key" id="">Customer Name: <input type="text" class="form-control value" id="em-cust-name" placeholder="Name" required="required" ng-model="customer.name" /> </div>
+                                              <div class="col-md-3 key" id="">Phone: <input type="text" class="form-control value" id="em-cust-nbr" placeholder="Mobile" required="required" ng-model="customer.mobile" /></div>
+                                              <div class="col-md-3 key" id="">Email ID: <input type="email" class="form-control value" id="em-cust-email" placeholder="Email ID" required="required" ng-model="customer.email" /></div>
+                                            </div>
+                                      </div>
+                                      <div class="row">
+                                            <hr>
+                                            <div class="row">
+                                              <div class="col-md-3 key" id="">Start Reading: <input type="text" class="form-control value" id="em-start-odo" placeholder="{{cars[booking.carId].currentOdometer}}" required="required" ng-model="booking.startOdometer" ng-change="changeKms()" /> </div>
+                                              <div class="col-md-3 key" id="">End Reading: <input type="text" class="form-control value" id="em-end-odo" placeholder="12,000" required="required" ng-model="booking.endOdometer" ng-change="changeKms()" /></div>
+                                              <div class="col-md-3 key" id="">Kilometers: <input type="text" class="form-control value" id="em-kms" placeholder="kms" required="required" ng-model="booking.kilometers" /></div>
+                                              <div class="col-md-3 key" id="">Rate: <input type="text" class="form-control value" id="em-rate" placeholder="10.00" required="required" ng-model="booking.rate" /></div>
+                                            </div>
+                                      </div>
+                                      <div class="row">
+                                            <hr>
+                                            <div class="row">
+                                              <div class="col-md-6 key" id="">Last Known Location: <textarea type="text" class="form-control value" id="em-loc" placeholder="Name" required="required" rows="2" ng-model="booking.lastKnownLocation" /><p class = "value">{{locationName}}</div>
+                                              <div class="col-md-6 key" id=""><div class="maps_modal" id="google_map_modal"></div></div>
+                                            </div>
+                                      </div>
+                              </div>
+                              <div class="col-md-4">
+                                      <br>
+                                      <div class="row">
+                                              <div class="row">
+                                                  <div class="col-md-12 key text-center">Car Details</div>
+                                              </div>
+                                              
+                                              <div class="row btn-group col-md-12" >
+                                                    <div class="row" ng-repeat="car in cars">
+                                                        <div class="col-md-2"></div>
+                                                        <div class="col-md-10">
+                                                            <label class="btn btn-default col-md-12" >
+                                                            <input type="radio" id="{{'car-sel-' + car.id}}" class="pull-right" ng-model="booking.carId" ng-value="car.id"/>
+                                                            <img src="img/cars/{{car.model + '-sm'}}.png" alt="Share" class="img-responsive" /><span class="value">{{car.registrationNumber}}</span>
+                                                            </label>
+                                                        </div>
+                                                        
+                                                    </div>
+                                              </div>
+                                      </div>
+                                      <br>
+                                      <div class="row">
+                                      
+                                              <div class="row">
+                                                  <div class="col-md-12 key text-center">Driver Details</div>
+                                              </div>
+                                              
+                                              <div class="row btn-group col-md-12" >
+                                                    <div class="row" ng-repeat="driver in drivers">
+                                                        <div class="col-md-2"></div>
+                                                        <div class="col-md-10">
+                                                            <label class="btn btn-default col-md-12" >
+                                                            <input type="radio" id="{{'driver-sel-' + driver.id}}" class="pull-right" ng-model="booking.driverId" ng-value="driver.id"/>
+                                                            <img src="img/drivers/{{driver.firstName + '-sm'}}.jpg" alt="Share" class="img-responsive" /><span class="value">{{driver.firstName + ' ' + driver.lastName}}</span>
+                                                            </label>
+                                                        </div>
+                                                        
+                                                    </div>
+                                              </div>
+                                      </div>
+                                      <div class = "row">
+                                      <br>
+                                          
+                                      </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="row">
+                                      <br>
+                                          <div class="col-md-12 key text-center" id="em-show-alert">
+                                              
+                                          </div>
+                          </div>
+                      </div>
+                  </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="cancel()">Cancel</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal" ng-click="deleteEvent()">Delete</button>
+                <button class="btn btn-success"><a id="eventUrl" class="value-md" target="_blank" ng-click="ok()">Update</a></button>
+            </div>
+        <!-- /div>
+    </div>
+</div -->
