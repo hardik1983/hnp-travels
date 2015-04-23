@@ -1,5 +1,5 @@
 module.exports = function(app) {
-  /*app.dataSources.hnpDs.automigrate('user', function(err) {
+/*  app.dataSources.hnpDs.automigrate('user', function(err) {
     if (err) throw err;
     console.log('Models created:');
   });
@@ -19,7 +19,7 @@ module.exports = function(app) {
     if (err) throw err;
     console.log('Models created:');
   });
-  
+  /*
   function modifyResponse(ctx, model, next) {
     ctx.res.set('Access-Control-Expose-Headers', 'Location');
   }

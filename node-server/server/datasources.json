@@ -4,11 +4,11 @@
     "connector": "memory"
   },
   "hnpDs": {
-    "host": "49.40.32.176",
+    "host": "localhost",
     "port": 3306,
-    "database": "sonar",
-    "username": "sonar",
-    "password": "sonar",
+    "database": "hnptravels",
+    "username": "hnptravels",
+    "password": "feb2015ibm",
     "name": "hnpDs",
     "connector": "mysql"
   }
