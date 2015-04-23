@@ -1,0 +1,91 @@
+{
+  "name": "event",
+  "plural": "event",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "id": {
+      "type": "number",
+      "required": true
+    },
+    "userId": {
+      "type": "number",
+      "required": true
+    },
+    "carId": {
+      "type": "number",
+      "required": true
+    },
+    "driverId": {
+      "type": "number"
+    },
+    "customerId": {
+      "type": "number"
+    },
+    "eventDate": {
+      "type": "number",
+      "required": true
+    },
+    "eventTime": {
+      "type": "number"
+    },
+    "pickupAddress": {
+      "type": "string",
+      "required": true
+    },
+    "destination": {
+      "type": "string",
+      "required": true
+    },
+    "startOdometer": {
+      "type": "number"
+    },
+    "endOdometer": {
+      "type": "number"
+    },
+    "rate": {
+      "type": "number"
+    },
+    "kilometers": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string"
+    },
+    "destination1Time": {
+      "type": "number"
+    },
+    "destination2Time": {
+      "type": "number"
+    },
+    "dropOffTime": {
+      "type": "number"
+    },
+    "lastKnownLocation": {
+      "type": "string"
+    },
+    "dropOffDate": {
+      "type": "number",
+      "required": true
+    },
+    "customerFirstName": {
+      "type": "string"
+    },
+    "customerLastName": {
+      "type": "string"
+    },
+    "customerMobile": {
+      "type": "string"
+    },
+    "customerEmail": {
+      "type": "string"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": []
+}

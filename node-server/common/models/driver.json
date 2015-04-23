@@ -1,0 +1,47 @@
+{
+  "name": "driver",
+  "plural": "driver",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "id": {
+      "type": "number",
+      "required": true
+    },
+    "firstName": {
+      "type": "string",
+      "required": true
+    },
+    "lastName": {
+      "type": "string",
+      "required": true
+    },
+    "address": {
+      "type": "string",
+      "required": true
+    },
+    "emailId": {
+      "type": "string"
+    },
+    "cell": {
+      "type": "string"
+    },
+    "licenseNumber": {
+      "type": "string"
+    },
+    "userId": {
+      "type": "number",
+      "required": true
+    },
+    "expiryDate": {
+      "type": "string"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": []
+}

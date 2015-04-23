@@ -1,0 +1,59 @@
+{
+  "name": "car",
+  "plural": "car",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "id": {
+      "type": "number",
+      "required": true
+    },
+    "userId": {
+      "type": "number",
+      "required": true
+    },
+    "make": {
+      "type": "string",
+      "required": true
+    },
+    "model": {
+      "type": "string",
+      "required": true
+    },
+    "version": {
+      "type": "string"
+    },
+    "registrationNumber": {
+      "type": "string",
+      "required": true
+    },
+    "currentOdometer": {
+      "type": "number"
+    },
+    "lastServiceDate": {
+      "type": "string"
+    },
+    "nextServiceDate": {
+      "type": "string"
+    },
+    "lastKnownLocation": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "ownerName": {
+      "type": "string"
+    },
+    "ownerAddress": {
+      "type": "string"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": []
+}

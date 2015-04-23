@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>H&P Travels
+    </title>
+    <!-- Bootstrap Core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <!-- Fonts -->
+    <link href="font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="css/animate.css" rel="stylesheet" />
+    <link href="css/style.css" rel="stylesheet">
+    <link href="color/default.css" rel="stylesheet">
+    <link rel='stylesheet' href='css/fullcalendar.min.css' />
+    <base href="/">    
+  </head>
+  <body id="page-top" data-spy="scroll" data-target=".navbar-custom" ng-app="hnpApp" >
+    <!-- Preloader -->
+    <div id="preloader">
+      <div id="load">
+      </div>
+    </div>
+    <nav class="navbar navbar-custom navbar-fixed-top" role="navigation">
+    
+      <div class="container" ng-controller="userController as user">
+      
+        <div class="navbar-header page-scroll">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-main-collapse"> 
+            <i class="fa fa-bars"></i>
+          </button>
+          <a class="navbar-brand" href="index.html">                    <h1>H&P Travels</h1>                </a>
+        </div>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse navbar-right navbar-main-collapse">
+          <ul class="nav navbar-nav"> 
+            <li class="active"> 
+              <a href="#intro">Home</a>
+            </li> 
+            <li> 
+            <a href="#bookings">Bookings</a>
+            </li> 
+            <li> 
+            <a href="#cars">Cars</a>
+            </li> 
+            <li> 
+            <a href="#drivers">Drivers</a>
+            </li> 
+            <li class="dropdown"> 
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" id="user-name">{{user.firstName}} {{user.lastName}} 
+                <b class="caret"></b></a>
+              <ul class="dropdown-menu"> 
+                <li> 
+                <a href="#contact">Contact Us</a>
+            </li> 
+            <li> 
+            <a href="#">Logout</a>
+            </li>
+          </ul>
+          </li>
+          </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+      </div>
+      <!-- /.container -->
+    </nav>
+    
+    <!-- Modals -->
+    <div ng-controller="ongoingBookingController as ongoingBooking">
+    <!-- Section: intro -->
+    <section id="intro" class="intro">
+      <div class="container">
+        <div class="hnpcontainer" ng-controller="newBookingController as quickBooking">
+        
+            <!-- Booking Response Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-center">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Booking Results</h4>
+      </div>
+      <div class="modal-body">
+        {{message}}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Ok</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+          <div class="hnpfields">
+            <div class="row">
+              <div class="col-lg-9">
+                <form id="contact-form" ng-submit="book()">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="form-group" >
+                        <label class="hnp-label" for="name">                                Pickup
+                        </label> 
+                        <input type="text" class="form-control value" id="inp-pickup-address" placeholder="Pickup Address" required="required" ng-model="newBooking.pickupAddress" />
+                      </div>
+                      <div class="row">
+                        <div class="col-md-6">
+                          <div class="form-group"> 
+                            <label class="hnp-label" for="name">                                Departing
+                            </label> 
+                            <input type="date" class="form-control value" id="inp-pickup-date" placeholder="Pickup Date" required="required" ng-model="newBooking.pickupDate" />
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group"> 
+                            <label class="hnp-label" for="name">                                Returning
+                            </label> 
+                            <input type="date" class="form-control value" id="inp-return-date" placeholder="Return Date" required="required" ng-model="newBooking.dropOffDate" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-group"> 
+                        <label class="hnp-label" for="name">                                Destination
+                        </label> 
+                        <input type="text" class="form-control value" id="inp-destination" placeholder="Destination Address" required="required" ng-model="newBooking.destination" ng-keyup="suggestDestination()" />
+                      </div>
+                      <div class="row btn-group" >
+                        <div class="col-md-4">
+                          <label class="btn btn-default" >
+                          <input type="radio" id="car-sel-tavera" ng-model="newBooking.carId" value="1"/>
+                          <img src="img/icons/tavera.png" alt="Share" class="img-responsive center-block" /> <span class="value">Tavera</span>
+                          </label>
+                        </div>
+                        <div class="col-md-4">
+                          <label class="btn btn-default" >
+                          <input type="radio" id="car-sel-indica" ng-model="newBooking.carId" value="3"/>
+                          <img src="img/icons/indica.png" alt="Share" class="img-responsive center-block" /> <span class="value">Indica</span>
+                          </label>
+
+                        </div>
+                        <div class="col-md-4">
+                          <label class="btn btn-default" >
+                          <input type="radio" id="car-sel-indigo" ng-model="newBooking.carId" value="5"/>
+                          <img src="img/icons/indigo.png" alt="Share" class="img-responsive center-block" /> <span class="value">Indigo</span>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-12">
+                      <button type="submit" class="btn btn-warning pull-left" id="submit" data-toggle="modal" data-target="#myModal"><span class="glyphicon glyphicon-book"></span> Book
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="seperator"> </div>
+        
+        <div class="hnpcontainer" >
+        <!-- div class="hnpcontainer" ng-controller="ongoingBookingController as ongoingBooking" -->
+          <div class="hnpcontainer-bg" ng-repeat="booking in bookings | dateRange:currentDate">
+            <div class="hnpfields">
+            <div class="row">
+              <div class="col-md-1 divider-vertical" >
+                      <div class="row">
+                           <div class="col-md-12"  id="value"><div class="span12 text-center pull-bottom"><strong>{{booking.destination}} </strong></div></div>
+                      </div>
+                      <div class="row">
+                           <div class="col-md-12" id="key-soft"><div class="span12 text-center pull-bottom">Destination</div></div>
+                      </div>
+                      <!--div class="row">
+                           <div class="col-md-12"  id="value"><div class="span12 text-center pull-bottom"><h6 id="ongng-pickup">{{booking.pickupAddress}}</h6></div></div>
+                      </div-->
+              </div>
+              <div class="col-md-4 divider-vertical">
+                      <div class="row">
+                           <div class="col-md-12">
+                              <div class="row">
+                                  <div class="col-md-3"><img src="{{ 'img/icons/' + booking.carId + '.png'}}" alt="Share" class="img-responsive pull-left" id="ongng-car"/></div>
+                                  <div class="col-md-7"><label class="reg-nbr" id="ongng-car-reg">{{cars[booking.carId].registrationNumber}}</label></div>
+                                  <div class="col-md-2"><span class="pull-right"><button type="submit" class="btn-md btn-success pull-left active" id="ongng-car-sts">{{booking.status}}</button></span></div>
+                              </div>
+                           </div>
+                      </div>
+                      <div class="row">
+                      <br>
+                           <div class="col-md-12">
+                              <div class="row">
+                                  <div class="col-md-2" id="key">Pickup</div>
+                                  <div class="col-md-4 value" id="ongng-pickup-time"><!--span class="glyphicon glyphicon-time"></span--> {{booking.fEventDate}}</div>
+                                  <div class="col-md-3" id="key">Destination1</div>
+                                  <div class="col-md-3 value" id="ongng-dest1-time"><span class="pull-right"><span class="glyphicon glyphicon-time"></span> {{booking.destination1Time}}</span></div>
+                              </div>
+                              <div class="row">
+                                  <div class="col-md-2" id="key">Drop</div>
+                                  <div class="col-md-4 value" id="ongng-drop-time"><!--span class="glyphicon glyphicon-time"></span-->{{booking.fDropOffDate}}</div>
+                                  <div class="col-md-2" id="key">DropOff</div>
+                                  <div class="col-md-4 value" id="ongng-dest2-time"><span class="pull-right"><span class="glyphicon glyphicon-time"></span> {{booking.dropOffTime}}</span></div>
+                              </div>
+                           </div>
+                      </div>
+              </div>
+              <div class="col-md-3 divider-vertical">
+                      <div class="row">
+                           <div class="col-md-4" id="key">Driver:</div>
+                           <div class="col-md-8 value"><span class="pull-right" id="ongng-driver-name">{{drivers[booking.driverId].firstName + ' ' + drivers[booking.driverId].lastName }}</span></div>
+                      </div>
+                      <div class="row">
+                           <div class="col-md-4" id="key">License#:</div>
+                           <div class="col-md-8 value"><span class="pull-right" id="ongng-driver-lic">{{drivers[booking.driverId].licenseNumber}}</span></div>
+                      </div>
+                      <div class="row">
+                           <div class="col-md-4" id="key">Address:</div>
+                           <div class="col-md-8 value">
+                                <div class="span12 text-right" id="ongng-driver-add">{{drivers[booking.driverId].address}}</div>
+                           </div>
+                      </div>
+              </div>
+              <div class="col-md-3 divider-vertical">
+                      <div class="row">
+                           <div class="col-md-5" id="key">Customer:</div>
+                           <div class="col-md-7 value"><span class="pull-right text-right" id="ongng-cust-name">{{booking.customerFirstName + ' ' + booking.customerLastName}} </span></div>
+                      </div>
+                      <div class="row">
+                           <div class="col-md-5" id="key">Last Loc:</div>
+                           <div class="col-md-7 value"><div class="span12 text-right" id="{{'ongng-car-loc' + booking.id}}">{{booking.lastKnownLocation}}</div></div>
+                      </div>
+                      <div class="row">
+                           <div class="col-md-12 text-center"><a href="" class="" id="{{'ongng-dropdown-btn' + booking.id}}" ng-click="ddClick(booking.id)"><span class="glyphicon glyphicon-chevron-down"></span></a></div>
+                      </div>
+              </div>
+              <div class="col-md-1 text-center"><br><a href="" class="" id="ongng-share-btn"><span class="glyphicon glyphicon-share gi-2x"></a></span></div>
+            </div>
+            <div class="row" id="{{'ongng-dropdown' + booking.id}}" style="display: none" >
+            <hr>
+              <div class="row">
+                <div class="col-md-7">
+                <div class="row">
+                  <div class="col-md-5">
+                    <img src="img/icons/{{booking.carId}}.png" alt="Share" class="img-responsive pull-right" id="ongng-trckr-car" />
+                  </div>
+                  <div class="col-md-7">
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-5">
+                    <hr class="solid">
+                  </div>
+                  <div class="col-md-7">
+                    <hr class="dotted">
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-5 value" id="ongng-trckr-elapsed" >
+                    {{booking.elapsedTime}} Driven
+                  </div>
+                  <div class="col-md-7">
+                    <div class="span12 text-right value" id="{{'ongng-trckr-estimated' + booking.id}}">{{booking.estimatedTime}} Estimated.</div>
+                  </div>
+                </div>
+                </div>
+                <div class="col-md-5">
+                  <div class="row">
+                  <br>
+                    <div class="col-md-4">
+                        <button type="button" class="btn-sm btn-info pull-right" ng-click="pickedUp(booking.id)">Picked Up</button>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="button" class="btn-sm btn-info" ng-click="atDestination(booking.id)">At Destination</button>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="button" class="btn-sm btn-info" ng-click="droppedOff(booking.id)">Dropped Off</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                  <div class="col-md-12">
+                  <hr>
+                  <!-- img src="img/mapeg.png" alt="Google Maps" class="img-responsive center-block" id="ongng-google-map"/ -->
+                  <!-- google map -->
+                      <div class = "maps" id="{{'google_map' + booking.id}}"></div>
+                  <!-- /google map -->
+                  </div>
+              </div>
+            </div>
+            </div>
+          </div>
+          
+          
+        </div>
+        
+        </div>
+    </section>
+    <!-- /Section: intro -->
+    <!-- Section: bookings -->
+    <section id="bookings" class="home-section text-center bg-dark" >
+    <!-- section id="bookings" class="home-section text-center bg-dark" ng-controller="ongoingBookingController as upcomingBooking" -->
+       <div class="heading-contact">
+        <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2">
+              <div class="wow bounceInDown" data-wow-delay="0.2s">
+                <div class="section-heading">     <h2>Upcoming Bookings</h2> 
+                  
+                </div>
+              </div>
+              <button type="submit" class="btn btn-info pull-center" id="submit-add-booking" ng-click="showNewModal()"><span class="glyphicon glyphicon-plus"></span> Add Booking</button>
+            </div>
+          </div>
+        </div>
+        </div>
+        
+       <div class="container">
+          <div class="hnpcontainer">
+          <div id='calendar' class="key"></div>
+          </div>
+          
+       </div>
+    </section>
+    
+    </div>
+    <!-- /Section: bookings -->
+    <!-- Section: cars -->
+    <section id="cars" class="cars home-section text-center" ng-controller="carsController">
+        <div class="heading-contact">
+        <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2">
+              <div class="wow bounceInDown" data-wow-delay="0.2s">
+                <div class="section-heading">     <h2>Cars</h2> 
+                </div>
+              </div>
+              <button type="submit" class="btn btn-info pull-center" id="submit-add-car"><span class="glyphicon glyphicon-plus"></span> Add New Car</button>
+            </div>
+          </div>
+        </div>
+        </div>
+        <div class="container">
+        
+        <div ng-repeat="car in cars">
+          <div class="hnpcontainer">
+            <div class="hnpfields">
+            <div class="row">
+                <div class="col-md-5 divider-vertical">
+                    <div class="row">
+                        <div class="col-md-6 text-left" id="key-bg">Odometer Reading:</div>
+                        <div class="col-md-6 text-right value-bg" id="car-odo">{{car.currentOdometer}}</div>
+                    </div>
+                    
+                    <div class="row">
+                      <hr>
+                       <div class="col-md-6 text-left" id="key-bg">Owner Name:</div>
+                        <div class="col-md-6 text-right value-bg" id="car-owner-name">{{car.ownerName}}</div>
+                    </div>
+                    
+                    <div class="row">
+                        <br>
+                        <div class="col-md-6 text-left" id="key-bg">Owner Address:</div>
+                        <div class="col-md-6 text-right value-bg" id="car-owner-add">{{car.ownerAddress}}</div>
+                    </div>
+                    
+                    <div class="row">
+                        <br>
+                        <div class="col-md-6 text-left" id="key">Status:{{car.status}} </div>
+                        <div class="col-md-2 text-right" ><a href="#" class="btn-sm btn-default disabled" role="button" id="car-sts-garage">Garage</a></div>
+                        <div class="col-md-2 text-right"><a href="#" class="btn-sm btn-default disabled" role="button" id="car-sts-service">Service</a></div>
+                        <div class="col-md-2 text-right"><a href="#" class="btn-sm btn-success" role="button" id="car-sts-road">Road</a></div>
+                    </div>
+                    
+                    <div class="row">
+                        <br>
+                        <div class="col-md-6 text-left" id="key">Next Service:{{car.nextServiceDate}}</div>
+                        <div class="col-md-6 text-right value-md" id="car-next-service">1 month 17 days</div>
+                    </div>
+                    
+                    <div class="row">
+                    <br>
+                        <table class="table table-condensed">
+                          <thead class="value-md">
+                            <tr>
+                              <th class="text-center" >Date</th>
+                              <th class="text-center">Destination</th>
+                              <th class="text-center">Kilometers</th>
+                              <th></th>
+                            </tr>
+                          </thead>
+                          <tbody class="value-md">
+                            <tr>
+                              <td id="car-book-date">02-Feb-2015</td>
+                              <td id="car-dest">Abu</td>
+                              <td id="car-book-kms">885 kms</td>
+                              <td><a href="#" class="btn-xs btn-info key-soft" id="car-open-booking" role="button">Open Booking</a></td>
+                            </tr>
+                            <tr>
+                              <td>06-Feb-2015</td>
+                              <td>Ambaji</td>
+                              <td>655 kms</td>
+                              <td><a href="#" class="btn-xs btn-info" id="key-soft" role="button">Open Booking</a></td>
+                            </tr>
+                            <tr>
+                              <td>17-Feb-2015</td>
+                              <td>Barod</td>
+                              <td>305 kms</td>
+                              <td><a href="#" class="btn-xs btn-info" id="key-soft" role="button">Open Booking</a></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-md-7">
+                    <div class="row"><div class="col-md-10"></div>
+                      <div class="col-md-1 pull-right"><a href="#" class="" id="car-edit"><span class="glyphicon glyphicon-edit gi-2x"></span></a></div>
+                      <div class="col-md-1 pull-right"><a href="#" class="" id="car-delete"><span class="glyphicon glyphicon-remove gi-2x"></span></a></div>
+                    </div>  
+                    <div class="row"><div class="col-md-12">
+                       <img src="img/cars/{{car.model}}.png" alt="Cars" class="img-responsive center-block" id="car-image"/>
+                    </div></div>
+                     <div class="row"><div class="col-md-12">
+                       <h4 class="value-bg" id="car-reg-nbr">{{car.make}} {{car.model}} {{car.version}} : {{car.registrationNumber}}</h4>
+                    </div></div>
+                    <div class="row">
+                      <div class="col-md-2 text-right" id="key">
+                        Date:
+                      </div>
+                      <div class="col-md-4">
+                        <input type="date" class="form-control" id="car-pickup-date" placeholder="Pickup Date" required="required" />
+                      </div>
+                      <div class="col-md-2" id="key">
+                        Destination: 
+                      </div>
+                      <div class="col-md-4">
+                        <input type="text" class="form-control" id="car-destination" placeholder="Destination Address" required="required" />
+                      </div>
+                    </div>
+                    
+                    <div class="row"><div class="col-md-12">
+                      <br>
+                       <button type="submit" class="btn btn-warning center-block" id="submit-car-book"><span class="glyphicon glyphicon-book"></span> Book
+                      </button>
+                    </div></div>
+                    
+                </div>
+            </div>
+            </div>
+          </div>
+       </div> <!--np-repeat tag -->   
+        </div>
+    </section>
+    <!-- /Section: cars -->
+    
+    <!-- Section: drivers -->
+    <section id="drivers" class="home-section text-center bg-dark" ng-controller="driversController">
+      <div class="heading-contact">
+        <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2">
+              <div class="wow bounceInDown" data-wow-delay="0.2s">
+                <div class="section-heading">     <h2>Drivers</h2> 
+                  
+                </div>
+              </div>
+              <button type="submit" class="btn btn-info pull-center" id="submit-add-driver"><span class="glyphicon glyphicon-plus"></span> Add New Driver</button>
+            </div>
+          </div>
+        </div>
+        </div>
+        <div class="container">
+          <div class="hnpcontainer" ng-repeat="driver in drivers">
+          <div class="hnpfields">
+            <div class="row">
+                <div class="col-md-5 divider-vertical">
+                    <div class="row">
+                        <div class="col-md-6 text-left" id="key-bg">Driving Licence #:</div>
+                        <div class="col-md-6 text-right value-bg" id="driver-lic">{{driver.licenseNumber}}</div>
+                    </div>
+                    
+                    <div class="row">
+                      <hr>
+                       <div class="col-md-6 text-left" id="key-bg">Expiry Date:</div>
+                        <div class="col-md-6 text-right value-bg" id="driver-lic-expiry">{{driver.expiryDate}}</div>
+                    </div>
+                    
+                    <div class="row">
+                        <br>
+                        <div class="col-md-6 text-left" id="key-bg">Driver Address:</div>
+                        <div class="col-md-6 text-right value-bg" id="driver-add">{{driver.address}}</div>
+                    </div>
+                    
+                    <div class="row">
+                        <table class="table table-condensed">
+                          <thead class="value-md">
+                            <tr>
+                              <th class="text-center">Date</th>
+                              <th class="text-center">Destination</th>
+                              <th class="text-center">Kilometers</th>
+                              <th></th>
+                            </tr>
+                          </thead>
+                          <tbody class="value-md">
+                            <tr>
+                              <td id="driver-date">02-Feb-2015</td>
+                              <td id="driver-dest">Abu</td>
+                              <td id="driver-book-kms">885 kms</td>
+                              <td><a href="#" class="btn-xs btn-info key-soft" id="driver-open-booking" role="button">Open Booking</a></td>
+                            </tr>
+                            <tr>
+                              <td>06-Feb-2015</td>
+                              <td>Ambaji</td>
+                              <td>655 kms</td>
+                              <td><a href="#" class="btn-xs btn-info" id="key-soft" role="button">Open Booking</a></td>
+                            </tr>
+                            <tr>
+                              <td>17-Feb-2015</td>
+                              <td>Barod</td>
+                              <td>305 kms</td>
+                              <td><a href="#" class="btn-xs btn-info" id="key-soft" role="button">Open Booking</a></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-md-7">
+                    <div class="row">
+                      <div class="col-md-8">
+                        <div class="row" id="key-bg">
+                            <div class="col-md-12">Driving License</div>
+                        </div>
+                        <div class="row">
+                            <br>
+                            <div class="col-md-12"><img src="img/drivers/charles-dl.jpg" alt="Cars" class="img-responsive center-block" id="driver-lic-image"/></div>
+                        </div>
+                       
+                      </div>
+                      <div class="col-md-4">
+                       <img src="img/drivers/charles.jpg" alt="Cars" class="img-responsive center-block" id="driver-image"/>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-8">
+                       
+                      </div>
+                      <div class="col-md-4">
+                         <div class="value-bg" class="text-center" id="driver-name">{{driver.firstName + ' ' + driver.lastName}}</div>
+                      </div>
+                    </div>
+                    
+                    <div class="row"><div class="col-md-10"></div>
+                      <br>
+                      <div class="col-md-1 pull-right"><a href="#" class="" id="driver-edit"><span class="glyphicon glyphicon-edit gi-2x"></span></a></div>
+                      <div class="col-md-1 pull-right"><a href="#" class="" id="driver-delete"><span class="glyphicon glyphicon-remove gi-2x"></span></a></div>
+                    </div> 
+                    
+                </div>
+            </div>
+            </div>
+          </div>
+          
+        </div>
+    </section>
+    <!-- /Section: drivers -->
+    
+    <!-- Section: contact -->
+    <section id="contact" class="home-section text-center bg-white">
+      <div class="heading-contact">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-8 col-lg-offset-2">
+              <div class="wow bounceInDown" data-wow-delay="0.4s">
+                <div class="section-heading">     <h2>Get in touch</h2> 
+                  <i class="fa fa-2x fa-angle-down"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-2 col-lg-offset-5">
+            <hr class="marginbot-50">
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-lg-8">
+            <div class="boxed-grey">
+              <form id="contact-form">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group"> 
+                      <label for="name">                                Name
+                      </label>
+                      <input type="text" class="form-control" id="name" placeholder="Enter name" required="required" />
+                    </div>
+                    <div class="form-group"> 
+                      <label for="email">                                Email Address
+                      </label>
+                      <div class="input-group"> 
+                        <span class="input-group-addon"> 
+                          <span class="glyphicon glyphicon-envelope">
+                          </span>
+                        </span> 
+                        <input type="email" class="form-control" id="email" placeholder="Enter email" required="required" />
+                      </div>
+                    </div>
+                    <div class="form-group"> 
+                      <label for="subject">                                Subject
+                      </label> 
+                      <select id="subject" name="subject" class="form-control" required="required"> 
+                        <option value="na" selected="">Choose One:
+                        </option> 
+                        <option value="service">General Customer Service
+                        </option> 
+                        <option value="suggestions">Suggestions
+                        </option> 
+                        <option value="product">Product Support
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group"> 
+                      <label for="name">                                Message
+                      </label>
+<textarea name="message" id="message" class="form-control" rows="9" cols="25" required="required"
+                                placeholder="Message"></textarea>                                               
+                    </div>
+                  </div>
+                  <div class="col-md-12">
+                    <button type="submit" class="btn btn-skin pull-right" id="btnContactUs">                            Send Message
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="widget-contact">    <h5>Main Office</h5>
+              <address>      <strong>H&P Travels</strong> 
+                <br>      Srinand Residency, New Maninagar, NH 8, 
+                <br>      Ahmedabad, Gujarat 380008 
+                <br> 
+                <abbr title="Phone">P:</abbr> 9898-298982
+              </address>
+              <address>      <strong>Email</strong> 
+                <br> 
+                <a href="mailto:#">paulik.patel@hnptravels.com</a>
+              </address>
+              <address>      <strong>We're on social networks</strong> 
+                <br>
+                <ul class="company-social"> 
+                  <li class="social-facebook"> 
+                    <a href="#" target="_blank"> 
+                      <i class="fa fa-facebook"></i></a>
+                  </li> 
+                  <li class="social-twitter"> 
+                    <a href="#" target="_blank"> 
+                      <i class="fa fa-twitter"></i></a>
+                  </li> 
+                  <li class="social-dribble"> 
+                    <a href="#" target="_blank"> 
+                      <i class="fa fa-dribbble"></i></a>
+                  </li> 
+                  <li class="social-google"> 
+                    <a href="#" target="_blank">
+                      <i class="fa fa-google-plus"></i></a>
+                  </li>
+                </ul>
+              </address>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- /Section: contact -->
+    <footer>
+      <div class="container">
+        <div class="row">
+          <div class="col-md-12 col-lg-12">
+            <div class="wow shake" data-wow-delay="0.4s">
+              <div class="page-scroll marginbot-30"> 
+                <a href="#intro" id="totop" class="btn btn-circle"> 
+                  <i class="fa fa-angle-double-up animated"></i>      </a>
+              </div>
+            </div>
+            <p>&copy;Copyright 2015 - H&P Travels. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </div>
+    </footer>
+    <!-- Core JavaScript Files -->
+<script src="js/jquery.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/jquery.easing.min.js"></script>
+<script src="js/jquery.scrollTo.js"></script>
+<script src="js/wow.min.js"></script>
+<script src='js/moment.min.js'></script>
+<script src='js/fullcalendar.min.js'></script>
+<script src="http://maps.google.com/maps/api/js?sensor=true"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
+<script src="//code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
+<script src="http://angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.7.0.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.12.1/ui-bootstrap-tpls.js"></script>
+    <!-- Custom Theme JavaScript -->
+<script src="js/custom.js"></script>
+<!--script src="js/hnptravels.js"></script -->
+
+    <!-- AngularJS JavaScript -->
+    <script src="js/ng/app.js"></script>
+    <!-- AngularJS Controllers JavaScript -->
+    <script src="js/ng/controllers/cars-controller.js"></script>
+    <script src="js/ng/controllers/drivers-controller.js"></script>
+    <script src="js/ng/controllers/new-booking-controller.js"></script>
+    <script src="js/ng/controllers/ongoing-booking-controller.js"></script>
+    <script src="js/ng/controllers/upcoming-booking-controller.js"></script>
+    <script src="js/ng/controllers/user-controller.js"></script>
+    <!-- AngularJS Services JavaScript -->
+    <script src="js/ng/services/user-service.js"></script>
+    <script src="js/ng/services/booking-service.js"></script>
+    <script src="js/ng/services/car-service.js"></script>
+    <script src="js/ng/services/driver-service.js"></script>
+    <script src="js/ng/services/utility-service.js"></script>
+    <script src="js/ng/services/customer-service.js"></script>
+    <!-- AngularJS Filters JavaScript -->
+    <script src="js/ng/filters/date-range-filter.js"></script>
+    
+  </body>
+</html>
