@@ -6,9 +6,9 @@
   "hnpDs": {
     "host": "localhost",
     "port": 3306,
-    "database": "hnptravels",
-    "username": "hnptravels",
-    "password": "feb2015ibm",
+    "database": "sonar",
+    "username": "sonar",
+    "password": "sonar",
     "name": "hnpDs",
     "connector": "mysql"
   }

@@ -181,7 +181,7 @@
                       <div class="row">
                            <div class="col-md-12">
                               <div class="row">
-                                  <div class="col-md-3"><img src="{{ 'img/icons/' + booking.carId + '.png'}}" alt="Share" class="img-responsive pull-left" id="ongng-car"/></div>
+                                  <div class="col-md-3"><img ng-src="{{ 'img/icons/' + booking.carId + '.png'}}" alt="Share" class="img-responsive pull-left" id="ongng-car"/></div>
                                   <div class="col-md-7"><label class="reg-nbr" id="ongng-car-reg">{{cars[booking.carId].registrationNumber}}</label></div>
                                   <div class="col-md-2"><span class="pull-right"><button type="submit" class="btn-md btn-success pull-left active" id="ongng-car-sts">{{booking.status}}</button></span></div>
                               </div>
@@ -224,7 +224,7 @@
               <div class="col-md-3 divider-vertical">
                       <div class="row">
                            <div class="col-md-5" id="key">Customer:</div>
-                           <div class="col-md-7 value"><span class="pull-right text-right" id="ongng-cust-name">{{booking.customerFirstName + ' ' + booking.customerLastName}} </span></div>
+                           <div class="col-md-7 value"><span class="pull-right text-right" id="ongng-cust-name">{{customers[booking.customerId].firstName + ' ' + customers[booking.customerId].lastName}} </span></div>
                       </div>
                       <div class="row">
                            <div class="col-md-5" id="key">Last Loc:</div>
@@ -242,7 +242,7 @@
                 <div class="col-md-7">
                 <div class="row">
                   <div class="col-md-5">
-                    <img src="img/icons/{{booking.carId}}.png" alt="Share" class="img-responsive pull-right" id="ongng-trckr-car" />
+                    <img ng-src="{{ 'img/icons/' + booking.carId + '.png'}}" alt="Share" class="img-responsive pull-right" id="ongng-trckr-car" />
                   </div>
                   <div class="col-md-7">
                   </div>
@@ -419,7 +419,7 @@
                       <div class="col-md-1 pull-right"><a href="#" class="" id="car-delete"><span class="glyphicon glyphicon-remove gi-2x"></span></a></div>
                     </div>  
                     <div class="row"><div class="col-md-12">
-                       <img src="img/cars/{{car.model}}.png" alt="Cars" class="img-responsive center-block" id="car-image"/>
+                       <img ng-src="{{ 'img/cars/' + car.model + '.png'}}" alt="Cars" class="img-responsive center-block" id="car-image"/>
                     </div></div>
                      <div class="row"><div class="col-md-12">
                        <h4 class="value-bg" id="car-reg-nbr">{{car.make}} {{car.model}} {{car.version}} : {{car.registrationNumber}}</h4>
@@ -704,9 +704,13 @@
 <script src='js/fullcalendar.min.js'></script>
 <script src="http://maps.google.com/maps/api/js?sensor=true"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
-<script src="//code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
+<script src="http://code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
 <script src="http://angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.7.0.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.12.1/ui-bootstrap-tpls.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular-route.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular-resource.js"></script>
+
+
     <!-- Custom Theme JavaScript -->
 <script src="js/custom.js"></script>
 <!--script src="js/hnptravels.js"></script -->
@@ -727,6 +731,7 @@
     <script src="js/ng/services/driver-service.js"></script>
     <script src="js/ng/services/utility-service.js"></script>
     <script src="js/ng/services/customer-service.js"></script>
+    <script src="js/ng/services/lb-services.js"></script>
     <!-- AngularJS Filters JavaScript -->
     <script src="js/ng/filters/date-range-filter.js"></script>
     

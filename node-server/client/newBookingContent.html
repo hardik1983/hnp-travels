@@ -93,7 +93,7 @@
                                                         <div class="col-md-10">
                                                             <label class="btn btn-default col-md-12" >
                                                             <input type="radio" id="{{'car-sel-' + car.id}}" class="pull-right" ng-model="booking.carId" ng-value="car.id"/>
-                                                            <img src="img/cars/{{car.model + '-sm'}}.png" alt="Share" class="img-responsive" /><span class="value">{{car.registrationNumber}}</span>
+                                                            <img ng-src="{{ 'img/cars/' + car.model + '-sm.png' }}" alt="Share" class="img-responsive" /><span class="value">{{car.registrationNumber}}</span>
                                                             </label>
                                                         </div>
                                                         
@@ -113,7 +113,7 @@
                                                         <div class="col-md-10">
                                                             <label class="btn btn-default col-md-12" >
                                                             <input type="radio" id="{{'driver-sel-' + driver.id}}" class="pull-right" ng-model="booking.driverId" ng-value="driver.id"/>
-                                                            <img src="img/drivers/{{driver.firstName + '-sm'}}.jpg" alt="Share" class="img-responsive" /><span class="value">{{driver.firstName + ' ' + driver.lastName}}</span>
+                                                            <img ng-src="{{ 'img/drivers/' + driver.firstName + '-sm.jpg' }}" alt="Share" class="img-responsive" /><span class="value">{{driver.firstName + ' ' + driver.lastName}}</span>
                                                             </label>
                                                         </div>
                                                         

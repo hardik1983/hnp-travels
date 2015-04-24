@@ -1,5 +1,5 @@
 angular.module('hnpApp').controller('ongoingBookingController',
-  ['$scope', '$http', '$modal', '$location', 'bookingService', 'utilityService', 'driverService', 'carService', function ($scope, $http, $modal, $location, bookingService, utilityService, driverService, carService) {
+  ['$scope', '$http', '$modal', '$location', 'bookingService', 'utilityService', 'driverService', 'carService', 'Customer', function ($scope, $http, $modal, $location, bookingService, utilityService, driverService, carService, myCust) {
     'use strict';
     var allBookings = [];
     var userId = 12;
@@ -9,6 +9,7 @@ angular.module('hnpApp').controller('ongoingBookingController',
     var drivers = {};
     var cars = {};
     var bookings = {};
+    var customers = {};
     var eventList = [];
      
     var convertTime = function(input){
@@ -25,6 +26,8 @@ angular.module('hnpApp').controller('ongoingBookingController',
     $scope.bookings = allBookings;
     $scope.drivers = drivers;
     $scope.cars = cars;
+    $scope.customers = customers;
+    
     
 
     
@@ -33,7 +36,6 @@ angular.module('hnpApp').controller('ongoingBookingController',
         $('#calendar').fullCalendar('removeEventSource', eventList);
         var todayInt = parseInt(currentDate.replace(/-/g,'')); 
         for(var i=0; i<data.length; i++){
-        
             if(data[i].lastKnownLocation != 'null'){
                //data[i].estimatedTime = calculateEstimatedTime(data[i].lastKnownLocation, data[i].destination, data[i].id);
                if ( data[i].dropOffTime != 0){
@@ -68,9 +70,20 @@ angular.module('hnpApp').controller('ongoingBookingController',
               data[i].elapsedTime = utilityService.getElapsedTime(data[i].eventDate, data[i].eventTime); 
             }
             
-            
-            
-            bookings[data[i].id] = data[i]; 
+            bookings[data[i].id] = data[i];
+
+            if(data[i].customerId != 0){
+                myCust.findById({ id: data[i].customerId }, function(list) {
+                   var customer = {
+                      id: list.id,
+                      firstName: list.firstName,
+                      lastName: list.lastName,
+                      cell: list.cell,
+                      emailId: list.emailId
+                   };
+                   customers[list.id] = customer;
+                });
+            } 
             
             //Populate Event
             eventList[i] = {};
@@ -114,7 +127,6 @@ angular.module('hnpApp').controller('ongoingBookingController',
             for(var i=0; i<carData.length; i++){
                cars[carData[i].id] = carData[i];
             }
-          console.log(cars);       
         });
         
         
@@ -371,6 +383,12 @@ angular.module('hnpApp').controller('ongoingBookingController',
             }); // pass name to Dialog
         };
         
+        $scope.opts.resolve.customers = function() {
+            return angular.copy({
+              customers: $scope.customers
+            }); // pass name to Dialog
+        };
+        
         var modalInstance = $modal.open($scope.opts);
         
         modalInstance.result.then(function(result){
@@ -452,7 +470,7 @@ angular.module('hnpApp').controller('ongoingBookingController',
 );
 
 angular.module('hnpApp').controller('EditBookingController',
-  ['$scope', '$modalInstance', '$modal', 'bookings', 'cars', 'drivers', 'bookingService', 'utilityService', 'customerService', function ($scope, $modalInstance, $modal, bookings, cars, drivers, bookingService, utilityService, customerService) {
+  ['$scope', '$modalInstance', '$modal', 'bookings', 'cars', 'drivers', 'customers', 'bookingService', 'utilityService', 'customerService', function ($scope, $modalInstance, $modal, bookings, cars, drivers, customers, bookingService, utilityService, customerService) {
     
     //Functions
     var convertTimeToString = function(input){
@@ -515,6 +533,17 @@ angular.module('hnpApp').controller('EditBookingController',
     $scope.booking.repDropOffDate = utilityService.getDate(bookings.booking.dropOffDate);
     $scope.cars = cars.cars;
     $scope.drivers = drivers.drivers;
+    $scope.customer = customers.customers[$scope.booking.customerId];
+    if($scope.booking.customerId != 0){
+      $scope.customer.name = $scope.customer.firstName + ' ' + $scope.customer.lastName;
+    } else {
+      var cust = {
+        name: '',
+        cell: '',
+        emailId: ''
+      };
+      $scope.customer = cust;
+    }
     $scope.booking.eventTime = convertTimeToString($scope.booking.eventTime);
     $scope.booking.destination1Time = convertTimeToString($scope.booking.destination1Time);
     $scope.booking.destination2Time = convertTimeToString($scope.booking.destination2Time);
@@ -556,7 +585,7 @@ angular.module('hnpApp').controller('EditBookingController',
         content:  '<div class="info"><strong>' + cars[$scope.booking.carId].registrationNumber + '</strong><br><br>Last known location at<br></div>'
     });*/
     
-    
+    /*
     if(bookings.booking.customerId != 0){
          var name = bookings.booking.customerFirstName + ' ' + bookings.booking.customerLastName;
          var customer = {id: bookings.booking.customerId, name: name, mobile : bookings.booking.customerMobile, email : bookings.booking.customerEmail};
@@ -565,7 +594,7 @@ angular.module('hnpApp').controller('EditBookingController',
     else{
       var customer = {id: 0, name: '', mobile: '', email: ''};
       $scope.customer = customer;
-    }
+    } */
     
     $scope.ok = function (result) {
         $scope.booking.eventTime = convertTime($scope.booking.eventTime);
@@ -587,7 +616,7 @@ angular.module('hnpApp').controller('EditBookingController',
          }
          
          
-          var promise = bookingService.getCustomerId($scope.booking, $scope.customer.mobile, $scope.customer.name, $scope.customer.email);
+          var promise = bookingService.getCustomerId($scope.booking, $scope.customer.cell, $scope.customer.name, $scope.customer.emailId);
           promise.then(function(result){
               $scope.booking.customerId = result;
               bookingService.updateBooking($scope.booking).success(function(updatedData){
@@ -797,12 +826,11 @@ angular.module('hnpApp').controller('NewBookingController',
               
               var promise = bookingService.getCustomerId($scope.booking, $scope.customer.mobile, $scope.customer.name, $scope.customer.email);
               promise.then(function(result){
+                  console.log(result);
                   $scope.booking.customerId = result;
                   bookingService.addBooking($scope.booking).success(function(data, status, headers){
                       $('#em-show-alert').html(alertSuccess);
-                      var uri = headers('Location');
-                      var uriParts = uri.split('/');
-                      $scope.booking.id = uriParts[uriParts.length-1];
+                      $scope.booking.id = data.id;
                       $scope.booking.customerMobile = $scope.customer.mobile;
                       $scope.booking.customerEmail = $scope.customer.email;
                       var names = $scope.customer.name.split(' ');

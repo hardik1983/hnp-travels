@@ -1,5 +1,5 @@
 angular.module('hnpApp').controller('newBookingController',
-  ['$scope', '$http', 'bookingService', 'utilityService' , function ($scope, $http, bookingService, utilityService) {
+  ['$scope', '$http', 'bookingService', 'utilityService', 'Event' , function ($scope, $http, bookingService, utilityService, eventSrvc) {
     'use strict';
     
     //Initialize the Screen
@@ -39,8 +39,6 @@ angular.module('hnpApp').controller('newBookingController',
     newBooking.carId = 1;
     $scope.newBooking = newBooking;
     
-    
-    
     //Functions
     
     $scope.suggestDestination = function(){
@@ -56,7 +54,7 @@ angular.module('hnpApp').controller('newBookingController',
       var pickupDateInt = dod.replace(/-/g, "");
       dod = utilityService.formatDate($scope.newBooking.dropOffDate);
       var dropoffDateInt = dod.replace(/-/g, "");
-      
+
       bookingService.createNewBooking(userId, $scope.newBooking.carId, $scope.newBooking.pickupAddress, $scope.newBooking.destination, pickupDateInt, dropoffDateInt).
         success(function(response){
             $scope.message = 'New Booking Created Successfully';

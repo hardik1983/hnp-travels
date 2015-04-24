@@ -72,7 +72,7 @@ angular.module('hnpApp').service('bookingService', function($http, $q) {
   };
   
   var getCustomer = function(userId, mobile){
-       var actualURL = apiURL + 'customer/?userId=' + userId + '&mobile=' + mobile;
+       var actualURL = apiURL + 'customer/?filter[where][userId]=' + userId + '&filter[where][cell]=' + mobile;
        return $http.get(actualURL);
   };
   
@@ -134,9 +134,7 @@ angular.module('hnpApp').service('bookingService', function($http, $q) {
                             cell : mobile
                           };
                           createNewCustomer(customer).success(function(data, status, headers){
-                              var uri = headers('Location');
-                              var uriParts = uri.split('/');
-                              ne.customerId = uriParts[uriParts.length-1];
+                             ne.customerId = data.id;
                               //return addBooking(ne);
                               resolve(ne.customerId);
                           }).error(function(){
@@ -174,7 +172,7 @@ angular.module('hnpApp').service('bookingService', function($http, $q) {
   
   
   this.retrieveAllBooking = function(userId){
-     var actualURL = resourceURL + '?userId=' + userId;
+     var actualURL = resourceURL + '?filter[where][userId]=' + userId;
      return $http.get(actualURL);
   };
   
