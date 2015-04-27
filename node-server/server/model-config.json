@@ -7,9 +7,6 @@
       "./models"
     ]
   },
-  "User": {
-    "dataSource": "db"
-  },
   "AccessToken": {
     "dataSource": "db",
     "public": false
@@ -26,10 +23,6 @@
     "dataSource": "db",
     "public": false
   },
-  "user": {
-    "dataSource": "hnpDs",
-    "public": true
-  },
   "driver": {
     "dataSource": "hnpDs",
     "public": true
@@ -43,6 +36,10 @@
     "public": true
   },
   "event": {
+    "dataSource": "hnpDs",
+    "public": true
+  },
+  "user": {
     "dataSource": "hnpDs",
     "public": true
   }

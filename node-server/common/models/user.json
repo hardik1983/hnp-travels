@@ -1,16 +1,12 @@
 {
   "name": "user",
   "plural": "user",
-  "base": "PersistedModel",
+  "base": "User",
   "idInjection": true,
   "options": {
     "validateUpsert": true
   },
   "properties": {
-    "id": {
-      "type": "number",
-      "required": true
-    },
     "firstName": {
       "type": "string",
       "required": true
@@ -19,15 +15,33 @@
       "type": "string",
       "required": true
     },
-    "emailId": {
-      "type": "string"
-    },
     "mobile": {
-      "type": "string"
+      "type": "string",
+      "required": true
+    },
+    "type": {
+      "type": "string",
+      "required": true
     }
   },
   "validations": [],
-  "relations": {},
+  "relations": {
+    "cars": {
+      "type": "hasMany",
+      "model": "car",
+      "foreignKey": "carId"
+    },
+    "drivers": {
+      "type": "hasMany",
+      "model": "driver",
+      "foreignKey": "driverId"
+    },
+    "events": {
+      "type": "hasMany",
+      "model": "event",
+      "foreignKey": "eventId"
+    }
+  },
   "acls": [],
   "methods": []
 }

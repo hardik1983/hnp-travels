@@ -14,15 +14,16 @@
     <link href="css/animate.css" rel="stylesheet" />
     <link href="css/style.css" rel="stylesheet">
     <link href="color/default.css" rel="stylesheet">
+    <base href="/">
   </head>
-  <body id="page-top" data-spy="scroll" data-target=".navbar-custom">
+  <body id="page-top" data-spy="scroll" data-target=".navbar-custom" ng-app="hnpApp">
     <!-- Preloader -->
     <div id="preloader">
       <div id="load">
       </div>
     </div>
     <!-- Section: intro -->
-    <section id="intro" class="intro">
+    <section id="intro" class="intro" ng-controller="loginController">
     
     <div class="heading-contact">
         <div class="container">
@@ -44,31 +45,107 @@
         <div class="hnpcontainer">
           <div class="hnpfields">
             <div class="row">
-              <div class="col-lg-8">
+              <div class="col-lg-7">
                 <form id="contact-form">
                   <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group  text-center">
+                          <label class="hnp-label" for="name">                                <h3>Sign In</h3>
+                          </label> 
+                          
+                        </div>
+                      </div>
                     <div class="col-md-6">
                       <div class="form-group  text-center">
-                        <label class="hnp-label" for="name">                                User ID:
+                        <label class="hnp-label" for="name">                                Email ID:
                         </label> 
-                        <input type="text" class="form-control" id="userid" placeholder="Unique Id Provided" required="required" ng-model/>
+                        <input type="text" class="form-control" id="userid" placeholder="Unique Id Provided" required="required" ng-model="username"/>
                       </div>
                     </div>
                     <div class="col-md-6">
                       <div class="form-group"> 
                         <label class="hnp-label" for="name">                                Password:
                         </label> 
-                        <input type="text" class="form-control" id="password" placeholder="Secret Password" required="required" />
+                        <input type="password" class="form-control" id="password" placeholder="Secret Password" required="required" ng-model="password"/>
                       </div>
                     </div>
                     </div>
                     <div class="row">
                     <div class="col-md-12">
-                      <a href="index.html?userid=" class="btn-lg btn-warning" role="button" id="btn-login"><span class="glyphicon glyphicon-user"></span> Login</a>
+                      <br>
+                      <a href="" class="btn-lg btn-warning" role="button" id="btn-login" ng-click="login()"><span class="glyphicon glyphicon-user"></span> Login</a>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-12">
+                      <br>
+                      <div class="value-alert">{{message}}</div>
                     </div>
                   </div>
                 </form>
               </div>
+              <div class="col-lg-1"></div>
+              <div class="col-lg-4">
+                <form id="registration-form">
+                  <div class="row">
+                      <div class="col-md-12">
+                        <div class="form-group  text-center">
+                          <label class="hnp-label">                                <h3>Registration</h3>
+                          </label> 
+                          
+                        </div>
+                      </div>
+                      <div class="col-md-12">
+                        <div class="form-group  text-center">
+                          <label class="hnp-label" for="name">                                Email ID:
+                          </label> 
+                          <input type="text" class="form-control" id="email" placeholder="yourid@domain.com" required="required" ng-model="user.emailId"/>
+                        </div>
+                      </div>
+                      <div class="col-md-12">
+                        <div class="form-group"> 
+                          <label class="hnp-label" for="password">                                Password:
+                          </label> 
+                          <input type="password" class="form-control" id="password" placeholder="Secret Password" required="required" ng-model="user.password"/>
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="form-group"> 
+                          <label class="hnp-label" for="name">                                First Name:
+                          </label> 
+                          <input type="text" class="form-control" id="firstName" placeholder="First Name" required="required" ng-model="user.firstName"/>
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="form-group"> 
+                          <label class="hnp-label" for="name">                                Last Name:
+                          </label> 
+                          <input type="text" class="form-control" id="lastName" placeholder="Last Name" required="required" ng-model="user.lastName"/>
+                        </div>
+                      </div>
+                      <div class="col-md-12">
+                        <div class="form-group"> 
+                          <label class="hnp-label" for="mobile">                                Mobile:
+                          </label> 
+                          <input type="text" class="form-control" id="mobile" placeholder="11231231234" required="required" ng-model="user.cell" />
+                        </div>
+                      </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-12">
+                      <br>
+                      <a href="" class="btn-lg btn-success" role="button" id="btn-login" ng-click="register()"><span class="glyphicon glyphicon-user"></span> Sign Up</a>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-12">
+                      <br>
+                      <div class="value-green text-center">{{registerMsg}} </div>
+                    </div>
+                  </div>
+                </form>
+              </div>
+              
             </div>
           </div>
         </div>
@@ -211,7 +288,22 @@
 <script src="js/jquery.easing.min.js"></script>
 <script src="js/jquery.scrollTo.js"></script>
 <script src="js/wow.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular-route.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular-resource.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.12.1/ui-bootstrap-tpls.js"></script>
+
+
     <!-- Custom Theme JavaScript -->
 <script src="js/custom.js"></script>
+    <!-- AngularJS JavaScript -->
+    <script src="js/ng/app.js"></script>
+    <!-- AngularJS Controllers JavaScript -->
+    <script src="js/ng/controllers/login-controller.js"></script>
+    <!-- AngularJS Services JavaScript -->
+    <script src="js/ng/services/lb-services.js"></script>
+    <!-- AngularJS Filters JavaScript -->
+
+
   </body>
 </html>

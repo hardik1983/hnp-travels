@@ -646,6 +646,19 @@ form#contact-form .form-group label {
    font-weight: bold;
 } */
 
+.value-alert {
+  font-size: 18px;
+   font-weight: bold;
+   color: #B20000;
+}
+
+.value-green {
+  font-size: 14px;
+   font-weight: bold;
+   color: #006600;
+}
+
+
 .value {
   font-size: 13px;
    font-weight: bold;

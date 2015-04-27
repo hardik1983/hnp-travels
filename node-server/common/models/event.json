@@ -85,7 +85,28 @@
     }
   },
   "validations": [],
-  "relations": {},
+  "relations": {
+    "customerId": {
+      "type": "hasOne",
+      "model": "customer",
+      "foreignKey": "customerId"
+    },
+    "carId": {
+      "type": "hasOne",
+      "model": "car",
+      "foreignKey": "carId"
+    },
+    "userId": {
+      "type": "hasOne",
+      "model": "user",
+      "foreignKey": "userId"
+    },
+    "driverId": {
+      "type": "hasOne",
+      "model": "driver",
+      "foreignKey": "driverId"
+    }
+  },
   "acls": [],
   "methods": []
 }
