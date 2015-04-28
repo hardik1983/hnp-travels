@@ -29,6 +29,11 @@ angular.module('hnpApp').controller('userController',
             $window.location.href="/main.html";
         });
     
-    } 
+    }
+    
+    $scope.logout = function(){
+        myUser.logout();
+        $window.location.href="/main.html";
+    }; 
   }]
 );

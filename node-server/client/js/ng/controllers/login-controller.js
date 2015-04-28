@@ -2,7 +2,7 @@ angular.module('hnpApp').controller('loginController',
   ['$scope', '$http', 'User', '$window' , function ($scope, $http, myUser, $window) {
     'use strict';
   
-  $scope.username = 'hardik1983@hnp.com';
+  $scope.username = 'hardik.d.patel@gmail.com';
   
   $scope.login = function(){
     console.log('Email ID: ' + $scope.username);
@@ -11,7 +11,7 @@ angular.module('hnpApp').controller('loginController',
     myUser.login({username: $scope.username, password: $scope.password },function(token){
        console.log(token);
        if(token.user.type == 'owner'){
-        $window.location.href="/index.html?tkn=" + token.id;
+        $window.location.href="/hnp.html?tkn=" + token.id;
        }
     }, function(err){
       console.log(err);

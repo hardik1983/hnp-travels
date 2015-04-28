@@ -1,13 +1,11 @@
 angular.module('hnpApp').controller('carsController',
-  ['$scope', 'carService' , function ($scope, carService) {
+  ['$scope', 'carService', 'User' , function ($scope, carService, myUser) {
     'use strict';
-     var userId = 12;
-    
-    
-    carService.retrieveAllCars(userId).
-          success(function(carData){
-            $scope.cars = carData;
+     myUser.getCurrent(function(data, status){
+        myUser.cars({ id: data.id}, function(carData, status){
+            $scope.cars = carData;   
+        });
+          
     });
-    
-    }]
+  }]
 );

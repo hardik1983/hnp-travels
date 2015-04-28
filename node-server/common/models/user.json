@@ -42,6 +42,90 @@
       "foreignKey": "eventId"
     }
   },
-  "acls": [],
+  "acls": [
+            { "principalType": "ROLE",
+            "principalId": "$everyone",
+            "permission": "DENY" },
+          { "principalType": "ROLE",
+            "principalId": "$everyone",
+            "permission": "ALLOW",
+            "property": "create" },
+          { "principalType": "ROLE",
+            "principalId": "$owner",
+            "permission": "ALLOW",
+            "property": "deleteById" },
+          { "principalType": "ROLE",
+            "principalId": "$everyone",
+            "permission": "ALLOW",
+            "property": "login" },
+          { "principalType": "ROLE",
+            "principalId": "$everyone",
+            "permission": "ALLOW",
+            "property": "logout" },
+          { "principalType": "ROLE",
+            "principalId": "$owner",
+            "permission": "ALLOW",
+            "property": "findById" },
+          { "principalType": "ROLE",
+            "principalId": "$owner",
+            "permission": "ALLOW",
+            "property": "updateAttributes" },
+          { "principalType": "ROLE",
+            "principalId": "$everyone",
+            "permission": "ALLOW",
+            "property": "confirm" },
+          { "principalType": "ROLE",
+            "principalId": "$everyone",
+            "permission": "ALLOW",
+            "property": "resetPassword",
+            "accessType": "EXECUTE" 
+          }, 
+          {
+           "principalType": "ROLE",
+           "principalId": "$authenticated",
+           "permission": "ALLOW",
+           "property": "count"
+          },
+          {
+           "principalType": "ROLE",
+           "principalId": "$owner",
+           "permission": "ALLOW",
+           "accessType": "EXECUTE",
+           "property": "__get__cars"
+          },
+          {
+           "principalType": "ROLE",
+           "principalId": "$owner",
+           "permission": "ALLOW",
+           "accessType": "EXECUTE",
+           "property": "__get__drivers"
+          },
+          {
+           "principalType": "ROLE",
+           "principalId": "$owner",
+           "permission": "ALLOW",
+           "accessType": "EXECUTE",
+           "property": "__create__drivers"
+          },
+          {
+           "principalType": "ROLE",
+           "principalId": "$owner",
+           "permission": "ALLOW",
+           "accessType": "EXECUTE",
+           "property": "__get__events"
+          },
+          {
+           "principalType": "ROLE",
+           "principalId": "$owner",
+           "permission": "ALLOW",
+           "accessType": "EXECUTE",
+           "property": "__create__events"
+          },
+          {
+           "principalType": "ROLE",
+           "principalId": "$authenticated",
+           "permission": "ALLOW",
+           "property": "__count__cars"
+          }],
   "methods": []
 }

@@ -1,13 +1,10 @@
 angular.module('hnpApp').controller('driversController',
-  ['$scope', 'driverService' , function ($scope, driverService) {
+  ['$scope', 'driverService', 'User' , function ($scope, driverService, myUser) {
     'use strict';
-    
-    var userId=12;
-    
-    driverService.retrieveAllDrivers(userId).
-          success(function(driverData){
-            $scope.drivers = driverData;        
-    });
-    
-    }]
+    myUser.getCurrent(function(data, status){
+       myUser.drivers({ id: data.id}, function(driverData, status){
+            $scope.drivers = driverData;
+        });
+    });  
+  }]
 );

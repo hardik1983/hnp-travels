@@ -1,5 +1,5 @@
 angular.module('hnpApp').controller('ongoingBookingController',
-  ['$scope', '$http', '$modal', '$location', 'bookingService', 'utilityService', 'driverService', 'carService', 'Customer', function ($scope, $http, $modal, $location, bookingService, utilityService, driverService, carService, myCust) {
+  ['$scope', '$http', '$modal', '$location', 'bookingService', 'utilityService', 'driverService', 'carService', 'Customer', 'User', function ($scope, $http, $modal, $location, bookingService, utilityService, driverService, carService, myCust, myUser) {
     'use strict';
     var allBookings = [];
     var userId = 12;
@@ -19,7 +19,45 @@ angular.module('hnpApp').controller('ongoingBookingController',
       }
       input = input.replace(/:/g, "");
       return parseInt(input); 
-    };    
+    };  
+    var populateCalendar = function(booking){
+        var todayInt = parseInt(currentDate.replace(/-/g,'')); 
+        var eventItem = {};
+        eventItem.id = booking.id;
+        eventItem.title = booking.destination;
+        eventItem.allDay = true;
+        eventItem.start = utilityService.formatDateString(booking.eventDate);
+        eventItem.end = utilityService.formatDateStringEnd(booking.dropOffDate);
+        eventItem.editable = true;
+        eventItem.description = booking.pickupAddress + ' to ' + booking.destination + '<br />' + booking.customerFirstName;
+        
+        var endInt = parseInt((booking.dropOffDate + '').replace(/-/g,''));
+        if(endInt < todayInt){
+          eventItem.className = ['btn-skin', 'btn-default', 'inactive', 'event-item-expired'];
+        }
+        else{
+          eventItem.className = ['btn-skin', 'btn-default', 'btn-lg', 'event-item'];
+        }
+        
+        return eventItem;
+    };
+    
+    var determineStatus = function(booking){
+        if(booking.lastKnownLocation != 'null'){
+           if ( booking.dropOffTime != 0){
+              return 'Complete';
+           } else if(booking.destination1Time != 0 || booking.destination2Time != 0){
+              return 'Returning';
+           } else if (booking.eventTime != 0) {
+              return 'Onwards';
+           } else {
+              return 'Scheduled';
+           }
+           
+        } else {
+          return null;  
+        }     
+    }  
     
     
     $scope.currentDate = currentDate;
@@ -28,32 +66,83 @@ angular.module('hnpApp').controller('ongoingBookingController',
     $scope.cars = cars;
     $scope.customers = customers;
     
-    
+    myUser.getCurrent(function(data, status){
+        myUser.cars({ id: data.id}, function(carData, status){
+            for(var i=0; i<carData.length; i++){
+               cars[carData[i].id] = carData[i];
+            }
+                
+        });
+        
+        myUser.drivers({ id: data.id}, function(driverData, status){
+            for(var i=0; i<driverData.length; i++){
+               drivers[driverData[i].id] = driverData[i];
+            }
+        });
+        
+        myUser.events({ id: data.id}, function(eventData, status){
+            $('#calendar').fullCalendar('removeEventSource', eventList);
+            var eventCustomers = [];
+            
+            for(var i=0; i<eventData.length; i++){
+              //Populate FullCalendar.io
+              eventList[i] = populateCalendar(eventData[i]);
+              
+              //Determine Status based on times
+              eventData.status = determineStatus(eventData[i]);
+              if(eventData.status == null){
+                  eventData[i].lastKnownLocation = "Unknown";
+                  eventData[i].estimatedTime = "Cannot Calculate";
+                  eventData[i].status = "Scheduled";
+              }
+              
+              //Convert Time into XX:XX format
+              eventData[i].eventTime = utilityService.formatTime(eventData[i].eventTime);
+              eventData[i].destination1Time = utilityService.formatTime(eventData[i].destination1Time);
+              eventData[i].destination2Time = utilityService.formatTime(eventData[i].destination2Time);
+              eventData[i].dropOffTime = utilityService.formatTime(eventData[i].dropOffTime);     
+              
+              //Calculate elapsed time since pickup
+              if(eventData[i].eventTime != '--:--'){
+                eventData[i].elapsedTime = utilityService.getElapsedTime(eventData[i].eventDate, eventData[i].eventTime); 
+              }
+              
+              //Populate Hash Map with key = booking.id
+              bookings[eventData[i].id] = eventData[i];
+              
+              //Collect Customer IDs of all the events
+              console.log(eventData[i].customerId)
+              if(eventData[i].customerId != 0){
+                eventCustomers.add(eventData[i].cusomterId);
+              }
+            }
+            
+            // Once all events are processed, retrieve all the active customers
+            if(eventCustomers.length > 0){
+                myCust.find({where: {id: {inq: eventCustomers}}}, function(list) {
+                       var customer = {
+                          id: list.id,
+                          firstName: list.firstName,
+                          lastName: list.lastName,
+                          cell: list.cell,
+                          emailId: list.emailId
+                       };
+                       customers[list.id] = customer;
+                });
+            }
 
+            $('#calendar').fullCalendar('addEventSource', eventList);
+        });
+          
+    });
+    
     
     bookingService.retrieveAllBooking(userId).
       success(function(data){
-        $('#calendar').fullCalendar('removeEventSource', eventList);
-        var todayInt = parseInt(currentDate.replace(/-/g,'')); 
+        //$('#calendar').fullCalendar('removeEventSource', eventList);
+        //var todayInt = parseInt(currentDate.replace(/-/g,'')); 
         for(var i=0; i<data.length; i++){
-            if(data[i].lastKnownLocation != 'null'){
-               //data[i].estimatedTime = calculateEstimatedTime(data[i].lastKnownLocation, data[i].destination, data[i].id);
-               if ( data[i].dropOffTime != 0){
-                data[i].status = 'Complete';
-               } else if(data[i].destination1Time != 0 || data[i].destination2Time != 0){
-                  data[i].status = 'Returning';
-               } else if (data[i].eventTime != 0) {
-                  data[i].status = 'Onwards';
-               } else {
-                  data[i].status = 'Scheduled';
-               }
-               
-            } else {
-              data[i].lastKnownLocation = "Unknown";
-              data[i].estimatedTime = "Cannot Calculate";
-              data[i].status = "Scheduled";
-            } 
-            
+            /*
             var remain = utilityService.daysRemaining(data[i].eventDate);
             if( remain >= 0){
               data[i].daysRemaining = remain + ' Days';
@@ -69,8 +158,8 @@ angular.module('hnpApp').controller('ongoingBookingController',
             if(data[i].eventTime != '--:--'){
               data[i].elapsedTime = utilityService.getElapsedTime(data[i].eventDate, data[i].eventTime); 
             }
-            
-            bookings[data[i].id] = data[i];
+            */
+            //bookings[data[i].id] = data[i];
 
             if(data[i].customerId != 0){
                 myCust.findById({ id: data[i].customerId }, function(list) {
@@ -86,7 +175,9 @@ angular.module('hnpApp').controller('ongoingBookingController',
             } 
             
             //Populate Event
-            eventList[i] = {};
+            populateCalendar(eventList[i], data[i]);
+            console.log(eventList[i]);
+            /*eventList[i] = {};
             eventList[i].id = data[i].id;
             eventList[i].title = data[i].destination;
             eventList[i].allDay = true;
@@ -106,14 +197,14 @@ angular.module('hnpApp').controller('ongoingBookingController',
             }
             else{
               eventList[i].className = ['btn-skin', 'btn-default', 'btn-lg', 'event-item'];
-            }
+            } */
             //eventList[i].line2 = cars[data[i].carId].registrationNumber;
             //eventList[i].id = data[i].id;
             //eventList[i].id = data[i].id;
             //eventList[i].id = data[i].id;
             //eventList[i].id = data[i].id;
         }
-        $scope.bookings = bookings;
+        /*$scope.bookings = bookings;
          driverService.retrieveAllDrivers(userId).
           success(function(driverData){
             for(var i=0; i<driverData.length; i++){
@@ -127,12 +218,8 @@ angular.module('hnpApp').controller('ongoingBookingController',
             for(var i=0; i<carData.length; i++){
                cars[carData[i].id] = carData[i];
             }
-        });
-        
-        
-        
-        
-        $('#calendar').fullCalendar('addEventSource', eventList);
+        }); */
+        //$('#calendar').fullCalendar('addEventSource', eventList);
         
       });
      
