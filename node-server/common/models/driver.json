@@ -7,10 +7,6 @@
     "validateUpsert": true
   },
   "properties": {
-    "id": {
-      "type": "number",
-      "required": true
-    },
     "firstName": {
       "type": "string",
       "required": true
@@ -32,16 +28,23 @@
     "licenseNumber": {
       "type": "string"
     },
-    "userId": {
-      "type": "number",
-      "required": true
-    },
     "expiryDate": {
       "type": "string"
     }
   },
   "validations": [],
-  "relations": {},
+  "relations": {
+    "user": {
+      "type": "belongsTo",
+      "model": "user",
+      "foreignKey": "userId"
+    },
+    "events": {
+      "type": "hasMany",
+      "model": "event",
+      "foreignKey": "driverId"
+    }
+  },
   "acls": [],
   "methods": []
 }

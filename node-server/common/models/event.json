@@ -7,24 +7,6 @@
     "validateUpsert": true
   },
   "properties": {
-    "id": {
-      "type": "number",
-      "required": true
-    },
-    "userId": {
-      "type": "number",
-      "required": true
-    },
-    "carId": {
-      "type": "number",
-      "required": true
-    },
-    "driverId": {
-      "type": "number"
-    },
-    "customerId": {
-      "type": "number"
-    },
     "eventDate": {
       "type": "number",
       "required": true
@@ -70,41 +52,29 @@
     "dropOffDate": {
       "type": "number",
       "required": true
-    },
-    "customerFirstName": {
-      "type": "string"
-    },
-    "customerLastName": {
-      "type": "string"
-    },
-    "customerMobile": {
-      "type": "string"
-    },
-    "customerEmail": {
-      "type": "string"
     }
   },
   "validations": [],
   "relations": {
-    "customerId": {
-      "type": "hasOne",
-      "model": "customer",
-      "foreignKey": "customerId"
-    },
-    "carId": {
-      "type": "hasOne",
-      "model": "car",
-      "foreignKey": "carId"
-    },
-    "userId": {
-      "type": "hasOne",
+    "user": {
+      "type": "belongsTo",
       "model": "user",
       "foreignKey": "userId"
     },
-    "driverId": {
-      "type": "hasOne",
+    "car": {
+      "type": "belongsTo",
+      "model": "car",
+      "foreignKey": "carId"
+    },
+    "driver": {
+      "type": "belongsTo",
       "model": "driver",
       "foreignKey": "driverId"
+    },
+    "customer": {
+      "type": "belongsTo",
+      "model": "customer",
+      "foreignKey": "customerId"
     }
   },
   "acls": [],

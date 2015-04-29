@@ -23,11 +23,11 @@
     "dataSource": "db",
     "public": false
   },
-  "driver": {
+  "customer": {
     "dataSource": "hnpDs",
     "public": true
   },
-  "customer": {
+  "user": {
     "dataSource": "hnpDs",
     "public": true
   },
@@ -35,11 +35,11 @@
     "dataSource": "hnpDs",
     "public": true
   },
-  "event": {
+  "driver": {
     "dataSource": "hnpDs",
     "public": true
   },
-  "user": {
+  "event": {
     "dataSource": "hnpDs",
     "public": true
   }

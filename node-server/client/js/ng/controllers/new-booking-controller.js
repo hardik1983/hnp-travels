@@ -1,10 +1,10 @@
 angular.module('hnpApp').controller('newBookingController',
-  ['$scope', '$http', 'bookingService', 'utilityService', 'Event' , function ($scope, $http, bookingService, utilityService, eventSrvc) {
+  ['$scope', '$http', 'User', 'utilityService', 'Event' , function ($scope, $http, myUser, utilityService, myEvent) {
     'use strict';
     
     //Initialize the Screen
     
-    var userId = 12; 
+    var userId = ''; 
    var today = new Date();
    $scope.popularDestination = [
       'Ahmedabad',
@@ -35,7 +35,7 @@ angular.module('hnpApp').controller('newBookingController',
     newBooking.pickupDate = today;
     newBooking.destination = '';
     //newBooking.dropOffDate = utilityService.formatDate(today);
-    newBooking.dropOffDate = today;
+    newBooking.dropingOffDate = today;
     newBooking.carId = 1;
     $scope.newBooking = newBooking;
     
@@ -52,27 +52,50 @@ angular.module('hnpApp').controller('newBookingController',
       $scope.message = 'Please wait...';
       var dod = utilityService.formatDate($scope.newBooking.pickupDate);
       var pickupDateInt = dod.replace(/-/g, "");
-      dod = utilityService.formatDate($scope.newBooking.dropOffDate);
+      dod = utilityService.formatDate($scope.newBooking.dropingOffDate);
       var dropoffDateInt = dod.replace(/-/g, "");
 
-      bookingService.createNewBooking(userId, $scope.newBooking.carId, $scope.newBooking.pickupAddress, $scope.newBooking.destination, pickupDateInt, dropoffDateInt).
-        success(function(response){
-            $scope.message = 'New Booking Created Successfully';
-            $scope.newBooking.pickupAddress = '';
-            $scope.newBooking.destination = '';
-            $scope.newBooking.pickupDate = utilityService.formatDate(today);
-            $scope.newBooking.dropOffDate = utilityService.formatDate(today);
-            
-       }).
-        error(function(data, status, headers, config){
-            if(status == 406){
-               $scope.message = 'Car already booked for these dates. Please select new date.';
-            }
-            else{
+      
+      if(userId != ''){
+          $scope.newBooking.userId = userId;
+          $scope.newBooking.eventDate = pickupDateInt;
+          $scope.newBooking.dropOffDate = dropoffDateInt;
+          
+          myEvent.create($scope.newBooking, function(createdEvent, status){
+              $scope.message = 'New Booking Created Successfully';
+              $scope.newBooking.pickupAddress = '';
+              $scope.newBooking.destination = '';
+          }, function (status){
+              if(status == 406){
+                 $scope.message = 'Car already booked for these dates. Please select new date.';
+              }
+              else{
+                $scope.message = 'Error Occurred while creating new booking';
+              }
+          });          
+      } else {
+          myUser.getCurrent(function(data, status){
+              userId = data.id;
+              $scope.newBooking.userId = data.id;
+              $scope.newBooking.eventDate = pickupDateInt;
+              $scope.newBooking.dropOffDate = dropoffDateInt;
+              
+              myEvent.create($scope.newBooking, function(createdEvent, status){
+                  $scope.message = 'New Booking Created Successfully';
+                  $scope.newBooking.pickupAddress = '';
+                  $scope.newBooking.destination = '';
+              }, function (status){
+                  if(status == 406){
+                     $scope.message = 'Car already booked for these dates. Please select new date.';
+                  }
+                  else{
+                    $scope.message = 'Error Occurred while creating new booking';
+                  }
+              });
+          }, function (status){
               $scope.message = 'Error Occurred while creating new booking';
-            }
-        });
-    
+          });
+      }
     };
     
     

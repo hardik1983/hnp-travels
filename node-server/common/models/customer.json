@@ -30,7 +30,13 @@
     }
   },
   "validations": [],
-  "relations": {},
+  "relations": {
+    "events": {
+      "type": "hasMany",
+      "model": "event",
+      "foreignKey": "customerId"
+    }
+  },
   "acls": [],
   "methods": []
 }

@@ -31,7 +31,7 @@
           <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-main-collapse"> 
             <i class="fa fa-bars"></i>
           </button>
-          <a class="navbar-brand" href="index.html">                    <h1>H&P Travels</h1>                </a>
+          <a class="navbar-brand" href="hnp.html">                    <h1>H&P Travels</h1>                </a>
         </div>
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse navbar-right navbar-main-collapse">
@@ -116,7 +116,7 @@
                           <div class="form-group"> 
                             <label class="hnp-label" for="name">                                Returning
                             </label> 
-                            <input type="date" class="form-control value" id="inp-return-date" placeholder="Return Date" required="required" ng-model="newBooking.dropOffDate" />
+                            <input type="date" class="form-control value" id="inp-return-date" placeholder="Return Date" required="required" ng-model="newBooking.dropingOffDate" />
                           </div>
                         </div>
                       </div>
@@ -181,8 +181,8 @@
                       <div class="row">
                            <div class="col-md-12">
                               <div class="row">
-                                  <div class="col-md-3"><img ng-src="{{ 'img/icons/' + booking.carId + '.png'}}" alt="Share" class="img-responsive pull-left" id="ongng-car"/></div>
-                                  <div class="col-md-7"><label class="reg-nbr" id="ongng-car-reg">{{cars[booking.carId].registrationNumber}}</label></div>
+                                  <div class="col-md-3"><img ng-src="{{ 'img/icons/' + booking.car.id + '.png'}}" alt="Share" class="img-responsive pull-left" id="ongng-car"/></div>
+                                  <div class="col-md-7"><label class="reg-nbr" id="ongng-car-reg">{{booking.car.registrationNumber}}</label></div>
                                   <div class="col-md-2"><span class="pull-right"><button type="submit" class="btn-md btn-success pull-left active" id="ongng-car-sts">{{booking.status}}</button></span></div>
                               </div>
                            </div>
@@ -208,23 +208,23 @@
               <div class="col-md-3 divider-vertical">
                       <div class="row">
                            <div class="col-md-4" id="key">Driver:</div>
-                           <div class="col-md-8 value"><span class="pull-right" id="ongng-driver-name">{{drivers[booking.driverId].firstName + ' ' + drivers[booking.driverId].lastName }}</span></div>
+                           <div class="col-md-8 value"><span class="pull-right" id="ongng-driver-name">{{booking.driver.firstName + ' ' + booking.driver.lastName }}</span></div>
                       </div>
                       <div class="row">
                            <div class="col-md-4" id="key">License#:</div>
-                           <div class="col-md-8 value"><span class="pull-right" id="ongng-driver-lic">{{drivers[booking.driverId].licenseNumber}}</span></div>
+                           <div class="col-md-8 value"><span class="pull-right" id="ongng-driver-lic">{{booking.driver.licenseNumber}}</span></div>
                       </div>
                       <div class="row">
                            <div class="col-md-4" id="key">Address:</div>
                            <div class="col-md-8 value">
-                                <div class="span12 text-right" id="ongng-driver-add">{{drivers[booking.driverId].address}}</div>
+                                <div class="span12 text-right" id="ongng-driver-add">{{booking.driver.address}}</div>
                            </div>
                       </div>
               </div>
               <div class="col-md-3 divider-vertical">
                       <div class="row">
                            <div class="col-md-5" id="key">Customer:</div>
-                           <div class="col-md-7 value"><span class="pull-right text-right" id="ongng-cust-name">{{customers[booking.customerId].firstName + ' ' + customers[booking.customerId].lastName}} </span></div>
+                           <div class="col-md-7 value"><span class="pull-right text-right" id="ongng-cust-name">{{booking.customer.firstName + ' ' + booking.customer.lastName}} </span></div>
                       </div>
                       <div class="row">
                            <div class="col-md-5" id="key">Last Loc:</div>
@@ -242,7 +242,7 @@
                 <div class="col-md-7">
                 <div class="row">
                   <div class="col-md-5">
-                    <img ng-src="{{ 'img/icons/' + booking.carId + '.png'}}" alt="Share" class="img-responsive pull-right" id="ongng-trckr-car" />
+                    <img ng-src="{{ 'img/icons/' + booking.car.id + '.png'}}" alt="Share" class="img-responsive pull-right" id="ongng-trckr-car" />
                   </div>
                   <div class="col-md-7">
                   </div>

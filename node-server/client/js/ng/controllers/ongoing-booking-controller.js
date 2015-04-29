@@ -1,5 +1,5 @@
 angular.module('hnpApp').controller('ongoingBookingController',
-  ['$scope', '$http', '$modal', '$location', 'bookingService', 'utilityService', 'driverService', 'carService', 'Customer', 'User', function ($scope, $http, $modal, $location, bookingService, utilityService, driverService, carService, myCust, myUser) {
+  ['$scope', '$http', '$modal', 'utilityService', 'Event', 'User', function ($scope, $http, $modal, utilityService, myEvent, myUser) {
     'use strict';
     var allBookings = [];
     var userId = 12;
@@ -9,7 +9,7 @@ angular.module('hnpApp').controller('ongoingBookingController',
     var drivers = {};
     var cars = {};
     var bookings = {};
-    var customers = {};
+    //var customers = {};
     var eventList = [];
      
     var convertTime = function(input){
@@ -29,7 +29,7 @@ angular.module('hnpApp').controller('ongoingBookingController',
         eventItem.start = utilityService.formatDateString(booking.eventDate);
         eventItem.end = utilityService.formatDateStringEnd(booking.dropOffDate);
         eventItem.editable = true;
-        eventItem.description = booking.pickupAddress + ' to ' + booking.destination + '<br />' + booking.customerFirstName;
+        eventItem.description = booking.pickupAddress + ' to ' + booking.destination + '<br />' + booking.customer.firstName;
         
         var endInt = parseInt((booking.dropOffDate + '').replace(/-/g,''));
         if(endInt < todayInt){
@@ -43,57 +43,50 @@ angular.module('hnpApp').controller('ongoingBookingController',
     };
     
     var determineStatus = function(booking){
-        if(booking.lastKnownLocation != 'null'){
-           if ( booking.dropOffTime != 0){
-              return 'Complete';
-           } else if(booking.destination1Time != 0 || booking.destination2Time != 0){
-              return 'Returning';
-           } else if (booking.eventTime != 0) {
-              return 'Onwards';
-           } else {
-              return 'Scheduled';
-           }
-           
-        } else {
-          return null;  
-        }     
+       if ( booking.dropOffTime != 0 && booking.dropOffTime != '--:--' ){
+          return 'Complete';
+       } else if ((booking.destination1Time != 0 && booking.destination1Time != '--:--')|| (booking.destination2Time != 0 && booking.destination2Time != '--:--')){
+          return 'Returning';
+       } else if (booking.eventTime != 0 && booking.eventTime != '--:--') {
+          return 'Onwards';
+       } else {
+          return 'Scheduled';
+       }
     }  
     
     
     $scope.currentDate = currentDate;
-    $scope.bookings = allBookings;
-    $scope.drivers = drivers;
+    $scope.bookings = bookings;
     $scope.cars = cars;
-    $scope.customers = customers;
+    $scope.drivers = drivers;
     
     myUser.getCurrent(function(data, status){
+        //Populate all the cars of this user
         myUser.cars({ id: data.id}, function(carData, status){
-            for(var i=0; i<carData.length; i++){
-               cars[carData[i].id] = carData[i];
+            for(var i=0; i < carData.length; i++){
+              cars[carData[i].id] = carData[i];
             }
-                
         });
         
+        //Populate all the drivers of this user
         myUser.drivers({ id: data.id}, function(driverData, status){
-            for(var i=0; i<driverData.length; i++){
-               drivers[driverData[i].id] = driverData[i];
+            for(var i=0; i < driverData.length; i++){
+              drivers[driverData[i].id] = driverData[i];
             }
         });
         
-        myUser.events({ id: data.id}, function(eventData, status){
+        myUser.events({ id: data.id, filter: {include: ['customer', 'car', 'driver'] }}, function(eventData, status){
             $('#calendar').fullCalendar('removeEventSource', eventList);
-            var eventCustomers = [];
-            
+            userId = data.id;
             for(var i=0; i<eventData.length; i++){
               //Populate FullCalendar.io
               eventList[i] = populateCalendar(eventData[i]);
               
               //Determine Status based on times
-              eventData.status = determineStatus(eventData[i]);
-              if(eventData.status == null){
+              eventData[i].status = determineStatus(eventData[i]);
+              if(eventData[i].lastKnownLocation == 'null' || eventData[i].lastKnownLocation == ''){
                   eventData[i].lastKnownLocation = "Unknown";
                   eventData[i].estimatedTime = "Cannot Calculate";
-                  eventData[i].status = "Scheduled";
               }
               
               //Convert Time into XX:XX format
@@ -109,122 +102,19 @@ angular.module('hnpApp').controller('ongoingBookingController',
               
               //Populate Hash Map with key = booking.id
               bookings[eventData[i].id] = eventData[i];
-              
-              //Collect Customer IDs of all the events
-              console.log(eventData[i].customerId)
-              if(eventData[i].customerId != 0){
-                eventCustomers.add(eventData[i].cusomterId);
-              }
             }
             
-            // Once all events are processed, retrieve all the active customers
-            if(eventCustomers.length > 0){
-                myCust.find({where: {id: {inq: eventCustomers}}}, function(list) {
-                       var customer = {
-                          id: list.id,
-                          firstName: list.firstName,
-                          lastName: list.lastName,
-                          cell: list.cell,
-                          emailId: list.emailId
-                       };
-                       customers[list.id] = customer;
-                });
-            }
-
             $('#calendar').fullCalendar('addEventSource', eventList);
         });
           
     });
     
     
-    bookingService.retrieveAllBooking(userId).
-      success(function(data){
-        //$('#calendar').fullCalendar('removeEventSource', eventList);
-        //var todayInt = parseInt(currentDate.replace(/-/g,'')); 
-        for(var i=0; i<data.length; i++){
-            /*
-            var remain = utilityService.daysRemaining(data[i].eventDate);
-            if( remain >= 0){
-              data[i].daysRemaining = remain + ' Days';
-            } else {
-              data[i].daysRemaining = 'Expired';
-            }
-             
-            data[i].eventTime = utilityService.formatTime(data[i].eventTime);
-            data[i].destination1Time = utilityService.formatTime(data[i].destination1Time);
-            data[i].destination2Time = utilityService.formatTime(data[i].destination2Time);
-            data[i].dropOffTime = utilityService.formatTime(data[i].dropOffTime);     
-            
-            if(data[i].eventTime != '--:--'){
-              data[i].elapsedTime = utilityService.getElapsedTime(data[i].eventDate, data[i].eventTime); 
-            }
-            */
-            //bookings[data[i].id] = data[i];
-
-            if(data[i].customerId != 0){
-                myCust.findById({ id: data[i].customerId }, function(list) {
-                   var customer = {
-                      id: list.id,
-                      firstName: list.firstName,
-                      lastName: list.lastName,
-                      cell: list.cell,
-                      emailId: list.emailId
-                   };
-                   customers[list.id] = customer;
-                });
-            } 
-            
-            //Populate Event
-            populateCalendar(eventList[i], data[i]);
-            console.log(eventList[i]);
-            /*eventList[i] = {};
-            eventList[i].id = data[i].id;
-            eventList[i].title = data[i].destination;
-            eventList[i].allDay = true;
-            eventList[i].start = utilityService.formatDateString(data[i].eventDate);
-            eventList[i].end = utilityService.formatDateStringEnd(data[i].dropOffDate);
-            eventList[i].editable = true;
-            if(data[i].customerFirstName == null){
-              eventList[i].description = data[i].pickupAddress + ' to ' + data[i].destination;            
-            } else {
-              eventList[i].description = data[i].pickupAddress + ' to ' + data[i].destination + '<br />' + data[i].customerFirstName;
-            }
-            
-            
-            var endInt = parseInt((data[i].dropOffDate + '').replace(/-/g,''));
-            if(endInt < todayInt){
-              eventList[i].className = ['btn-skin', 'btn-default', 'inactive', 'event-item-expired'];
-            }
-            else{
-              eventList[i].className = ['btn-skin', 'btn-default', 'btn-lg', 'event-item'];
-            } */
-            //eventList[i].line2 = cars[data[i].carId].registrationNumber;
-            //eventList[i].id = data[i].id;
-            //eventList[i].id = data[i].id;
-            //eventList[i].id = data[i].id;
-            //eventList[i].id = data[i].id;
-        }
-        /*$scope.bookings = bookings;
-         driverService.retrieveAllDrivers(userId).
-          success(function(driverData){
-            for(var i=0; i<driverData.length; i++){
-               drivers[driverData[i].id] = driverData[i];
-            }
-            
-        });
-        
-        carService.retrieveAllCars(userId).
-          success(function(carData){
-            for(var i=0; i<carData.length; i++){
-               cars[carData[i].id] = carData[i];
-            }
-        }); */
-        //$('#calendar').fullCalendar('addEventSource', eventList);
-        
-      });
      
     $scope.pickedUp = function(id){
         console.log('Picked Up customer for event ' + id);
+        
+        //Calculate Current Time
         var currTime = new Date();
         var hrs = currTime.getHours();
         var mins = currTime.getMinutes();
@@ -233,29 +123,23 @@ angular.module('hnpApp').controller('ongoingBookingController',
         if(mins < 10){mins = '0' + mins;}
         mins = mins + '';
 
-        bookings[id].eventTime = hrs + ':' + mins;
-        var ub = bookings[id];
-        ub.eventTime = convertTime(ub.eventTime);
-        ub.destination1Time = convertTime(ub.destination1Time);
-        ub.destination2Time = convertTime(ub.destination2Time);
-        ub.dropOffTime = convertTime(ub.dropOffTime);
-        if ( ub.dropOffTime != 0){
-          ub.status = 'Complete';
-         } else if(ub.destination1Time != 0 || ub.destination2Time != 0){
-            ub.status = 'Returning';
-         } else if (ub.eventTime != 0) {
-            ub.status = 'Onwards';
-         } else {
-            ub.status = 'Scheduled';
-         }
-        bookingService.updateBooking(ub).success(function(updatedData){
+        
+        //Determine Status & Time
+        var timeUpdated = hrs + '' + mins;
+        var status = determineStatus(bookings[id]);
+        
+        //Update attributes
+        myEvent.prototype$updateAttributes({id: id, eventTime: timeUpdated, status: status }, function(updatedData, status){
+          //Set formated time in memory
           $scope.bookings[id].eventTime = hrs + ':' + mins;
-          $scope.bookings[id].status = ub.status;
+          $scope.bookings[id].status = status;         
         });
+        
     };
     
     $scope.atDestination = function(id){
         console.log('Customer at destination for event ' + id);
+        //Calculate Current Time
         var currTime = new Date();
         var hrs = currTime.getHours();
         var mins = currTime.getMinutes();
@@ -263,30 +147,23 @@ angular.module('hnpApp').controller('ongoingBookingController',
         hrs = hrs + '';
         if(mins < 10){mins = '0' + mins;}
         mins = mins + '';
+
         
-        bookings[id].destination1Time = hrs + ':' + mins;
-        var ub = bookings[id];
-        ub.eventTime = convertTime(ub.eventTime);
-        ub.destination1Time = convertTime(ub.destination1Time);
-        ub.destination2Time = convertTime(ub.destination2Time);
-        ub.dropOffTime = convertTime(ub.dropOffTime);
-        if ( ub.dropOffTime != 0){
-          ub.status = 'Complete';
-         } else if(ub.destination1Time != 0 || ub.destination2Time != 0){
-            ub.status = 'Returning';
-         } else if (ub.eventTime != 0) {
-            ub.status = 'Onwards';
-         } else {
-            ub.status = 'Scheduled';
-         }
-        bookingService.updateBooking(ub).success(function(updatedData){
-          $scope.bookings[id].destination1Time = hrs + ':' + mins;
-          $scope.bookings[id].status = ub.status;
+        //Determine Status & Time
+        var timeUpdated = hrs + '' + mins;
+        var status = determineStatus(bookings[id]);
+        
+        //Update attributes
+        myEvent.prototype$updateAttributes({id: id, destination1Time: timeUpdated, status: status }, function(updatedData, status){
+          //Set formated time in memory
+          $scope.bookings[id].eventTime = hrs + ':' + mins;
+          $scope.bookings[id].status = status;         
         });
     };
     
     $scope.droppedOff = function(id){
         console.log('Dropped Off customer for event ' + id);
+        //Calculate Current Time
         var currTime = new Date();
         var hrs = currTime.getHours();
         var mins = currTime.getMinutes();
@@ -294,41 +171,35 @@ angular.module('hnpApp').controller('ongoingBookingController',
         hrs = hrs + '';
         if(mins < 10){mins = '0' + mins;}
         mins = mins + '';
-        
-        bookings[id].dropOffTime = hrs + ':' + mins;
-        var ub = bookings[id];
-        ub.eventTime = convertTime(ub.eventTime);
-        ub.destination1Time = convertTime(ub.destination1Time);
-        ub.destination2Time = convertTime(ub.destination2Time);
-        ub.dropOffTime = convertTime(ub.dropOffTime);
 
-        if ( ub.dropOffTime != 0){
-          ub.status = 'Complete';
-         } else if(ub.destination1Time != 0 || ub.destination2Time != 0){
-            ub.status = 'Returning';
-         } else if (ub.eventTime != 0) {
-            ub.status = 'Onwards';
-         } else {
-            ub.status = 'Scheduled';
-         }
-        bookingService.updateBooking(ub).success(function(updatedData){
-          $scope.bookings[id].dropOffTime = hrs + ':' + mins;
-          $scope.bookings[id].status = ub.status;
+        
+        //Determine Status & Time
+        var timeUpdated = hrs + '' + mins;
+        var status = determineStatus(bookings[id]);
+        
+        //Update attributes
+        myEvent.prototype$updateAttributes({id: id, dropOffTime: timeUpdated, status: status }, function(updatedData, status){
+          //Set formated time in memory
+          $scope.bookings[id].eventTime = hrs + ':' + mins;
+          $scope.bookings[id].status = status;         
         });
     };
     
     $scope.ddClick = function(index){
       $('#ongng-dropdown' + index).toggle();
       var res;
+      var latlng;
       if(bookings[index].lastKnownLocation != 'Unknown'){
         res = bookings[index].lastKnownLocation.split(',');
+        
       }
       else{
         res = [];
         res[0] = '42.986058';
         res[1] = '-81.242596';
+        //latlng = bookings[index].pickupAddress;
       } 
-      var latlng = new google.maps.LatLng(res[0], res[1]);
+      latlng = new google.maps.LatLng(res[0], res[1]);
       
       // prepare the map properties
       var options = {
@@ -356,14 +227,11 @@ angular.module('hnpApp').controller('ongoingBookingController',
       });
       // add information window
       var infowindow = new google.maps.InfoWindow({
-        content:  '<div class="info"><strong>' + cars[bookings[index].carId].registrationNumber + '</strong><br><br>Last known location at<br></div>'
+        content:  '<div class="info"><strong>' + bookings[index].carId.registrationNumber + '</strong><br><br>Last known location at<br></div>'
       });
       
       var currEstimated = $('#ongng-trckr-estimated' + index).text(); 
-      //if(currEstimated == 'Cannot Calculate.' || currEstimated == ' Estimated.'){
-          calculateEstimatedTime(bookings[index].lastKnownLocation, bookings[index].destination, index, directionsDisplay);
-      //}
-      
+      calculateEstimatedTime(bookings[index].lastKnownLocation, bookings[index].destination, index, directionsDisplay);
       findLocationName(bookings[index].lastKnownLocation, index);
       
     };
@@ -401,9 +269,10 @@ angular.module('hnpApp').controller('ongoingBookingController',
         function callback(response, status) {
             if (status == google.maps.DistanceMatrixStatus.OK) {
               var results = response.rows[0].elements[0];
-              //bookings[bookingId].estimatedTime = results.duration.text;
-              $scope.bookings[bookingId].estimatedTime = results.duration.text;
-              $('#ongng-trckr-estimated' + bookingId).text(results.duration.text + ' Estimated.');
+              if(results.duration !== null && results.duration !== undefined ){
+                  $scope.bookings[bookingId].estimatedTime = results.duration.text;
+                  $('#ongng-trckr-estimated' + bookingId).text(results.duration.text + ' Estimated.');
+              }
             }
             else {
               $('#ongng-trckr-estimated' + bookingId).text(results.duration.text + 'Cannot Calculate.');
@@ -426,12 +295,9 @@ angular.module('hnpApp').controller('ongoingBookingController',
     
     
     //Upcoming Bookings Section
-    
-    
     $('#calendar').fullCalendar({
-        dayClick: function() {
-          
-        },
+        //dayClick: function() {
+        //},
         eventClick: function(event, element) {
             $scope.showEditModal(event.id, event);
         },
@@ -467,12 +333,6 @@ angular.module('hnpApp').controller('ongoingBookingController',
         $scope.opts.resolve.drivers = function() {
             return angular.copy({
               drivers: $scope.drivers
-            }); // pass name to Dialog
-        };
-        
-        $scope.opts.resolve.customers = function() {
-            return angular.copy({
-              customers: $scope.customers
             }); // pass name to Dialog
         };
         
@@ -532,7 +392,11 @@ angular.module('hnpApp').controller('ongoingBookingController',
         var modalInstance = $modal.open($scope.opts);
         
         modalInstance.result.then(function(result){
-            bookings[result.id] = result;
+            //bookings[result.id] = result;
+            // Refresh event
+            myEvent.find({ id: result.id, filter: {include: ['customer', 'car', 'driver'] }}, function(eventData, status){
+              bookings[eventData.id] = eventData; 
+            });
             var newEvent = {};
             newEvent.id = result.id;
             newEvent.title = result.destination;
@@ -557,26 +421,22 @@ angular.module('hnpApp').controller('ongoingBookingController',
 );
 
 angular.module('hnpApp').controller('EditBookingController',
-  ['$scope', '$modalInstance', '$modal', 'bookings', 'cars', 'drivers', 'customers', 'bookingService', 'utilityService', 'customerService', function ($scope, $modalInstance, $modal, bookings, cars, drivers, customers, bookingService, utilityService, customerService) {
-    
+  ['$scope', '$modalInstance', '$modal', 'bookings', 'cars', 'drivers', 'utilityService', 'Event', 'Customer', function ($scope, $modalInstance, $modal, bookings, cars, drivers, utilityService, myEvent, myCust) {
+     
     //Functions
     var convertTimeToString = function(input){
-      var input = input + '';
-      var nullTime = '--:--';
-      
-      
-      if(input == 0 || input.length > 5 || input.length < 3){
-      
-        return nullTime;
-      }
-      if(input.length < 4) {
-        input = input[0] + ':' + input.substring(input.length-2, input.length);
-      }else{
-        input = input[0] + input[1] + ':' + input.substring(input.length-2, input.length);
-      }
-      return input; 
+        var input = input + '';
+        var nullTime = '--:--';
+        if(input == 0 || input.length > 5 || input.length < 3){
+          return nullTime;
+        }
+        if(input.length < 4) {
+          input = input[0] + ':' + input.substring(input.length-2, input.length);
+        }else{
+          input = input[0] + input[1] + ':' + input.substring(input.length-2, input.length);
+        }
+        return input; 
     };
-     
     var findLocationName = function (latlong, index){
       var geocoder = new google.maps.Geocoder();
       geocoder.geocode({'address': latlong}, function(results, status) {
@@ -610,32 +470,34 @@ angular.module('hnpApp').controller('EditBookingController',
     //Variables
     var res;
     var alertDuplicate = '<div class="alert alert-danger alert-error"><a href="#" class="close" data-dismiss="alert">&times;</a><strong>Error!</strong>Car already booked between these dates. Please select new dates.</div>';
+    var alertError = '<div class="alert alert-danger alert-error"><a href="#" class="close" data-dismiss="alert">&times;</a><strong>Error!</strong>Internal Error while proceesing the booking.</div>';
     var alertDelete = '<div class="alert alert-danger alert-error"><a href="#" class="close" data-dismiss="alert">&times;</a><strong>Error!</strong>Cannot Delete the Event.</div>';
     var alertSuccess = '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert">&times;</a><strong>Success!</strong> Event is edited successfully</div>';
     
     //Initialize
     $scope.booking = bookings.booking;
     $scope.booking.refPickupDate = utilityService.getDate(bookings.booking.eventDate);
-    //$scope.dropOffDate = utilityService.formatDateString(bookings.booking.dropOffDate);
     $scope.booking.repDropOffDate = utilityService.getDate(bookings.booking.dropOffDate);
     $scope.cars = cars.cars;
     $scope.drivers = drivers.drivers;
-    $scope.customer = customers.customers[$scope.booking.customerId];
-    if($scope.booking.customerId != 0){
-      $scope.customer.name = $scope.customer.firstName + ' ' + $scope.customer.lastName;
-    } else {
-      var cust = {
-        name: '',
-        cell: '',
-        emailId: ''
-      };
-      $scope.customer = cust;
+    
+    if($scope.booking.customer != null){
+        $scope.customer = $scope.booking.customer;
+        $scope.customer.name = $scope.customer.firstName + ' ' + $scope.customer.lastName;
+    } else{
+        $scope.customer = {};
     }
+    
     $scope.booking.eventTime = convertTimeToString($scope.booking.eventTime);
     $scope.booking.destination1Time = convertTimeToString($scope.booking.destination1Time);
     $scope.booking.destination2Time = convertTimeToString($scope.booking.destination2Time);
     $scope.booking.dropOffTime = convertTimeToString($scope.booking.dropOffTime);
     $scope.message = '';
+    var oldMobile = '';
+    
+    if($scope.customer != null && $scope.customer != undefined){
+      oldMobile = $scope.customer.cell;
+    }
     
     //Google Maps Stuff
     if($scope.booking.lastKnownLocation != '' && $scope.booking.lastKnownLocation != 'Unknown' && $scope.booking.lastKnownLocation !== null){
@@ -657,31 +519,6 @@ angular.module('hnpApp').controller('EditBookingController',
             scrollwheel: false,
             disableDoubleClickZoom: true
     };
-    // initialize the map object
-    /*var map = new google.maps.Map(document.getElementById("google_map_modal"), options);
-    // add Marker
-    var marker1 = new google.maps.Marker({
-        position: latlng, map: map
-    });
-    // add listener for a click on the pin
-    google.maps.event.addListener(marker1, 'click', function() {
-      infowindow.open(map, marker1);
-    });
-    // add information window
-    var infowindow = new google.maps.InfoWindow({
-        content:  '<div class="info"><strong>' + cars[$scope.booking.carId].registrationNumber + '</strong><br><br>Last known location at<br></div>'
-    });*/
-    
-    /*
-    if(bookings.booking.customerId != 0){
-         var name = bookings.booking.customerFirstName + ' ' + bookings.booking.customerLastName;
-         var customer = {id: bookings.booking.customerId, name: name, mobile : bookings.booking.customerMobile, email : bookings.booking.customerEmail};
-         $scope.customer = customer;
-    }
-    else{
-      var customer = {id: 0, name: '', mobile: '', email: ''};
-      $scope.customer = customer;
-    } */
     
     $scope.ok = function (result) {
         $scope.booking.eventTime = convertTime($scope.booking.eventTime);
@@ -692,71 +529,119 @@ angular.module('hnpApp').controller('EditBookingController',
         $scope.booking.dropOffDate = dod.replace(/-/g,'');
         dod = utilityService.formatDate($scope.booking.refPickupDate);
         $scope.booking.eventDate = dod.replace(/-/g,''); 
+
         if ( $scope.booking.dropOffTime != 0){
           $scope.booking.status = 'Complete';
-         } else if($scope.booking.destination1Time != 0 || $scope.booking.destination2Time != 0){
-            $scope.booking.status = 'Returning';
-         } else if ($scope.booking.eventTime != 0) {
-            $scope.booking.status = 'Onwards';
-         } else {
-            $scope.booking.status = 'Scheduled';
-         }
-         
-         
-          var promise = bookingService.getCustomerId($scope.booking, $scope.customer.cell, $scope.customer.name, $scope.customer.emailId);
-          promise.then(function(result){
-              $scope.booking.customerId = result;
-              bookingService.updateBooking($scope.booking).success(function(updatedData){
+        } else if($scope.booking.destination1Time != 0 || $scope.booking.destination2Time != 0){
+          $scope.booking.status = 'Returning';
+        } else if ($scope.booking.eventTime != 0) {
+          $scope.booking.status = 'Onwards';
+        } else {
+          $scope.booking.status = 'Scheduled';
+        }
+        
+        //Check if mobile # changed
+        if(oldMobile != $scope.customer.cell){
+            // Check if mobile was removed or empty
+            if( $scope.customer.cell == null || $scope.customer.cell == '' ){
+                // set customerId = null & Call Update
+                $scope.booking.customer = null;
+                $scope.booking.customerId = null;
+                myEvent.upsert($scope.booking, function(updatedData, status){
                   $('#em-show-alert').html(alertSuccess);
                   alert('Event updated successfully!');
                   $modalInstance.close($scope.booking);
-                  
-              }).error(function(data, status){
-                  if(status = 406){
-                    $('#em-show-alert').html(alertDuplicate);
-                    $scope.booking.eventTime = convertTimeToString($scope.booking.eventTime);
-                    $scope.booking.destination1Time = convertTimeToString($scope.booking.destination1Time);
-                    $scope.booking.destination2Time = convertTimeToString($scope.booking.destination2Time);
-                    $scope.booking.dropOffTime = convertTimeToString($scope.booking.dropOffTime);
-                    $scope.booking.dropOffDate = $scope.booking.repDropOffDate;
-                    $scope.booking.eventDate = $scope.booking.refPickupDate;
-                  }
-              });
-          });
+                }, function (error) {
+                  $('#em-show-alert').html(alertError);
+                });
+            } else { // Else
+                // Find new customer Id
+                 myCust.findOne({filter: {where : {cell: $scope.customer.cell}}}, function(cust, status){
+                    //CustomerId found
+                    //set customerId & Call Update
+                    $scope.booking.customer = cust;
+                    $scope.booking.customerId = cust.id;
+                    myEvent.upsert($scope.booking, function(updatedData, status){
+                      $('#em-show-alert').html(alertSuccess);
+                      alert('Event updated successfully!');
+                      $modalInstance.close($scope.booking);
+                    }, function (error) {
+                      $('#em-show-alert').html(alertError);
+                    });
+                    
+                 }, function(error) {
+                    // Customer Id Not found
+                    //Create new Customer
+                    var newCust = {};
+                    var names = $scope.customer.name.split(' ');
+                    newCust.firstName = names[0];
+                    newCust.lastName = '';
+                    if(names.length > 0){
+                       newCust.lastName = names[1];
+                    }
+                    newCust.cell = $scope.customer.cell;
+                    newCust.email = $scope.customer.email;
+                    //Create New Customer
+                    myCust.create(newCust, function(newCustomer, status){
+                        //set new custoemrId & Call Update
+                        $scope.booking.customer = newCustomer;
+                        $scope.booking.customerId = newCustomer.id;
+                        myEvent.upsert($scope.booking, function(updatedData, status){
+                          $('#em-show-alert').html(alertSuccess);
+                          alert('Event updated successfully!');
+                          $modalInstance.close($scope.booking);
+                        }, function (error) {
+                          $('#em-show-alert').html(alertError);
+                        });
+                    }, function (error) {
+                        //Error - set customerId = null and Call Update
+                        $scope.booking.customer = null;
+                        $scope.booking.customerId = null;
+                        myEvent.upsert($scope.booking, function(updatedData, status){
+                          $('#em-show-alert').html(alertSuccess);
+                          alert('Event updated successfully!');
+                          $modalInstance.close($scope.booking);
+                        }, function (error) {
+                          $('#em-show-alert').html(alertError);
+                        });
+                    });
+                 });
+            }
+        } else {
+            // Dont touch CustomerId field & Update
+            myEvent.upsert($scope.booking, function(updatedData, status){
+              $('#em-show-alert').html(alertSuccess);
+              alert('Event updated successfully!');
+              $modalInstance.close($scope.booking);
+            }, function (error) {
+              $('#em-show-alert').html(alertError);
+            });
+        }    
     };
     $scope.cancel = function () {
         $modalInstance.dismiss('cancel');
     };
-    
     $scope.deleteEvent = function () {
-        bookingService.deleteBooking($scope.booking.id).
-          success(function(){
-             alert('Event deleted successfully!');
-             $modalInstance.close(null);
-          }).error(function(data, status){
-            $('#em-show-alert').html(alertDelete);
-          });
-        
+        myEvent.deleteById({id: $scope.booking.id}, function(){
+           alert('Event deleted successfully!');
+           $modalInstance.close(null);
+        }, function(data, status){
+          $('#em-show-alert').html(alertDelete);
+        });
     };
-      
-      
-      
   }]
 );
 
 
 
 angular.module('hnpApp').controller('NewBookingController',
-  ['$scope', '$modalInstance', '$modal', 'cars', 'drivers', 'bookingService', 'utilityService', function ($scope, $modalInstance, $modal, cars, drivers, bookingService, utilityService) {
+  ['$scope', '$modalInstance', '$modal', 'cars', 'drivers', 'Event', 'User', 'Customer', function ($scope, $modalInstance, $modal, cars, drivers, myEvent, myUser, myCust) {
     
     //Functions
     var convertTimeToString = function(input){
       var input = input + '';
       var nullTime = '--:--';
-      
-      
       if(input == 0 || input.length > 5 || input.length < 3){
-      
         return nullTime;
       }
       if(input.length < 4) {
@@ -766,7 +651,6 @@ angular.module('hnpApp').controller('NewBookingController',
       }
       return input; 
     };
-     
     var findLocationName = function (latlong, index){
       var geocoder = new google.maps.Geocoder();
       geocoder.geocode({'address': latlong}, function(results, status) {
@@ -800,24 +684,12 @@ angular.module('hnpApp').controller('NewBookingController',
     //Variables
     var res;
     var alertDuplicate = '<div class="alert alert-danger alert-error"><a href="#" class="close" data-dismiss="alert">&times;</a><strong>Error!</strong>Car already booked between these dates. Please select new dates.</div>';
+    var alertError = '<div class="alert alert-danger alert-error"><a href="#" class="close" data-dismiss="alert">&times;</a><strong>Error!</strong>Internal Error while proceesing the booking.</div>';
     var alertIncomplete = '<div class="alert alert-danger alert-error"><a href="#" class="close" data-dismiss="alert">&times;</a><strong>Error!</strong>Pickup & Destination, Address and Date mandatory, along with a Car.</div>';
     var alertSuccess = '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert">&times;</a><strong>Success!</strong> Event created successfully</div>';
        
-    /*Initialize
-    $scope.booking = bookings.booking;
-    $scope.booking.refPickupDate = utilityService.formatDateString(bookings.booking.eventDate);
-    //$scope.dropOffDate = utilityService.formatDateString(bookings.booking.dropOffDate);
-    $scope.booking.repDropOffDate = utilityService.formatDateString(bookings.booking.dropOffDate);
-    $scope.cars = cars.cars;
-    $scope.drivers = drivers.drivers;
-    $scope.booking.eventTime = convertTimeToString($scope.booking.eventTime);
-    $scope.booking.destination1Time = convertTimeToString($scope.booking.destination1Time);
-    $scope.booking.destination2Time = convertTimeToString($scope.booking.destination2Time);
-    $scope.booking.dropOffTime = convertTimeToString($scope.booking.dropOffTime);
-    $scope.message = '';
-    */
     $scope.booking = {
-        userId : 12,
+        userId : 0,
         eventTime : 0,
         destination1Time : 0,
         destination2Time : 0,
@@ -841,52 +713,9 @@ angular.module('hnpApp').controller('NewBookingController',
     $scope.cars = cars.cars;
     $scope.drivers = drivers.drivers;
     
-    /*Google Maps Stuff
-    if($scope.booking.lastKnownLocation != '' && $scope.booking.lastKnownLocation != 'Unknown'){
-      findLocationName($scope.booking.lastKnownLocation);
-      res = $scope.booking.lastKnownLocation.split(',');
-    }else{
-      res = [];
-      res[0] = '42.986058';
-      res[1] = '-81.242596';
-    }
-    var latlng = new google.maps.LatLng(res[0], res[1]);
-    // prepare the map properties
-    var options = {
-            zoom: 15,
-            center: latlng,
-            mapTypeId: google.maps.MapTypeId.ROADMAP,
-            navigationControl: true,
-            mapTypeControl: false,
-            scrollwheel: false,
-            disableDoubleClickZoom: true
-    };*/
-    // initialize the map object
-    /*var map = new google.maps.Map(document.getElementById("google_map_modal"), options);
-    // add Marker
-    var marker1 = new google.maps.Marker({
-        position: latlng, map: map
-    });
-    // add listener for a click on the pin
-    google.maps.event.addListener(marker1, 'click', function() {
-      infowindow.open(map, marker1);
-    });
-    // add information window
-    var infowindow = new google.maps.InfoWindow({
-        content:  '<div class="info"><strong>' + cars[$scope.booking.carId].registrationNumber + '</strong><br><br>Last known location at<br></div>'
-    });*/
-    
-    /*
-    if(bookings.booking.customerId != 0){
-    
-    }
-    else{
-      var customer = {id: 0, name: '', mobile: '', email: ''};
-      $scope.customer = customer;
-    } */
-    
     $scope.ok = function (result) {
     
+        //All Mandatory Fields Populated??
         if($scope.booking.refPickupDate != '' && $scope.booking.repDropOffDate != '' 
             && $scope.booking.pikcupAddress != '' && $scope.booking.destination != '' 
             && $scope.booking.carId != '0'){
@@ -910,50 +739,109 @@ angular.module('hnpApp').controller('NewBookingController',
                   $scope.booking.status = 'Scheduled';
                }
                $scope.booking.lastKnownLocation = '';
-              
-              var promise = bookingService.getCustomerId($scope.booking, $scope.customer.mobile, $scope.customer.name, $scope.customer.email);
-              promise.then(function(result){
-                  console.log(result);
-                  $scope.booking.customerId = result;
-                  bookingService.addBooking($scope.booking).success(function(data, status, headers){
-                      $('#em-show-alert').html(alertSuccess);
-                      $scope.booking.id = data.id;
-                      $scope.booking.customerMobile = $scope.customer.mobile;
-                      $scope.booking.customerEmail = $scope.customer.email;
-                      var names = $scope.customer.name.split(' ');
-                          $scope.booking.customerFirstName = names[0];
-                          $scope.booking.customerLastName = '';
-                          if(names.length > 0){
-                             $scope.booking.customerLastName = names[1];
-                          }
-                      //return addBooking(ne);
-                      alert('Event created successfully!');
-                      $modalInstance.close($scope.booking);
-                  }).error(function(data, status){
-                      if(status = 406){
-                        $('#em-show-alert').html(alertDuplicate);
-                        $scope.booking.eventTime = convertTimeToString($scope.booking.eventTime);
-                        $scope.booking.destination1Time = convertTimeToString($scope.booking.destination1Time);
-                        $scope.booking.destination2Time = convertTimeToString($scope.booking.destination2Time);
-                        $scope.booking.dropOffTime = convertTimeToString($scope.booking.dropOffTime);
-                        $scope.booking.dropOffDate = $scope.booking.repDropOffDate;
-                        $scope.booking.eventDate = $scope.booking.refPickupDate;
-                      }
-                  });
-                  
-              });
+              // 0. Check if Customer is present
+              if($scope.customer.mobile != null && $scope.customer.mobile != ''){
+                  console.log('finding ' + $scope.customer.mobile);
+                  myCust.findOne({filter: {where : {cell: $scope.customer.mobile}}}, function(cust, status){
+                    //Customer Found, attach that customer;
+                    myUser.getCurrent(function(data, status){
+                      $scope.booking.userId = data.id;
+                      $scope.booking.customerId = cust.id
+                      myEvent.create($scope.booking, function(createdEvent, status){
+                           $('#em-show-alert').html(alertSuccess);
+                           $scope.booking.id = data.id;
+                            alert('Event created successfully!');
                             
+                            //Retrieve event with all dependent details
+                            myEvent.find({ id: data.id, filter: {include: ['customer', 'car', 'driver'] }}, function(eventData, status){
+                              $modalInstance.close(eventData);
+                            }, function(error){
+                              $modalInstance.close($scope.booking);
+                            });                          
+                            
+                      }, function(status){
+                        $('#em-show-alert').html(alertError);               
+                      });
+                    }); 
+                  }, function (status){
+                    //Customer Not Found, create One.
+                    var newCust = {};
+                    var names = $scope.customer.name.split(' ');
+                    newCust.firstName = names[0];
+                    newCust.lastName = '';
+                    if(names.length > 0){
+                       newCust.lastName = names[1];
+                    }
+                    newCust.cell = $scope.customer.mobile;
+                    newCust.emailId = $scope.customer.email;
+                    //Create New Customer
+                    myCust.create(newCust, function(newCustomer, status){
+                      myUser.getCurrent(function(data, status){
+                        $scope.booking.userId = data.id;
+                        //Assign New Customer
+                        $scope.booking.customerId = newCustomer.id
+                        myEvent.create($scope.booking, function(createdEvent, status){
+                             $('#em-show-alert').html(alertSuccess);
+                             $scope.booking.id = data.id;
+                              alert('Event created successfully!');
+                              
+                              //Retrieve event with all dependent details
+                              myEvent.find({ id: data.id, filter: {include: ['customer', 'car', 'driver'] }}, function(eventData, status){
+                                $modalInstance.close(eventData);
+                              }, function(error){
+                                $modalInstance.close($scope.booking);
+                              }); 
+                              
+                        }, function(status){
+                          $('#em-show-alert').html(alertError);               
+                        });
+                      }); 
+                    }, function(status){
+                        //If create new customer fails, proceed with event creation atleast.
+                       myUser.getCurrent(function(data, status){
+                        $scope.booking.userId = data.id;
+                        myEvent.create($scope.booking, function(createdEvent, status){
+                             $('#em-show-alert').html(alertSuccess);
+                             $scope.booking.id = data.id;
+                              alert('Event created successfully!');
+                              
+                              //Retrieve event with all dependent details
+                              myEvent.find({ id: data.id, filter: {include: ['customer', 'car', 'driver'] }}, function(eventData, status){
+                                $modalInstance.close(eventData);
+                              }, function(error){
+                                $modalInstance.close($scope.booking);
+                              }); 
+                        }, function(status){
+                          $('#em-show-alert').html(alertError);              
+                        });
+                      }); 
+                    });
+                  });
+              } else {
+                  // 1. Create Event
+                  myUser.getCurrent(function(data, status){
+                    $scope.booking.userId = data.id;
+                    myEvent.create($scope.booking, function(createdEvent, status){
+                         $('#em-show-alert').html(alertSuccess);
+                         $scope.booking.id = data.id;
+                         alert('Event created successfully!');
+                         //Retrieve event with all dependent details
+                          myEvent.find({ id: data.id, filter: {include: ['customer', 'car', 'driver'] }}, function(eventData, status){
+                            $modalInstance.close(eventData);
+                          }, function(error){
+                            $modalInstance.close($scope.booking);
+                          }); 
+                    }, function(status){
+                      $('#em-show-alert').html(alertError);              
+                    }); 
+                  });
+              }
         } else {
            $('#em-show-alert').html(alertIncomplete);
         }
-            
-        
     };
     $scope.cancel = function () {
         $modalInstance.dismiss('cancel');
     };
-      
-      
-      
   }]
 );

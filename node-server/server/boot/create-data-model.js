@@ -16,14 +16,14 @@ module.exports = function(app) {
   app.dataSources.hnpDs.automigrate('car', function(err) {
     if (err) throw err;
     console.log('Models created:');
-  }); */
+  });
   
   app.dataSources.hnpDs.automigrate('event', function(err) {
     if (err) throw err;
     console.log('Models created:');
   });
   
-  /*
+  
   function modifyResponse(ctx, model, next) {
     ctx.res.set('Access-Control-Expose-Headers', 'Location');
   }

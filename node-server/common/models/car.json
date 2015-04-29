@@ -7,14 +7,6 @@
     "validateUpsert": true
   },
   "properties": {
-    "id": {
-      "type": "number",
-      "required": true
-    },
-    "userId": {
-      "type": "number",
-      "required": true
-    },
     "make": {
       "type": "string",
       "required": true
@@ -24,7 +16,8 @@
       "required": true
     },
     "version": {
-      "type": "string"
+      "type": "string",
+      "required": true
     },
     "registrationNumber": {
       "type": "string",
@@ -39,9 +32,6 @@
     "nextServiceDate": {
       "type": "string"
     },
-    "lastKnownLocation": {
-      "type": "string"
-    },
     "status": {
       "type": "string"
     },
@@ -54,10 +44,15 @@
   },
   "validations": [],
   "relations": {
-    "userId": {
+    "user": {
       "type": "belongsTo",
       "model": "user",
       "foreignKey": "userId"
+    },
+    "events": {
+      "type": "hasMany",
+      "model": "event",
+      "foreignKey": "carId"
     }
   },
   "acls": [],
