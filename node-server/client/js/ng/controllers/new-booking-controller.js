@@ -47,6 +47,17 @@ angular.module('hnpApp').controller('newBookingController',
       });
     };
     
+    var showError = function(error){
+      if(error.data != null && error.data !== undefined 
+          && error.data.error != null && error.data.error !== undefined
+          && error.data.error.sqlState == '12000'){
+      
+          $scope.message = 'Car already booked for these dates. Please select new date.';
+      } else {
+          $scope.message = 'Internal Error Occurred while creating a booking.';
+      }
+    };
+    
     
     $scope.book = function(){
       $scope.message = 'Please wait...';
@@ -66,12 +77,7 @@ angular.module('hnpApp').controller('newBookingController',
               $scope.newBooking.pickupAddress = '';
               $scope.newBooking.destination = '';
           }, function (status){
-              if(status == 406){
-                 $scope.message = 'Car already booked for these dates. Please select new date.';
-              }
-              else{
-                $scope.message = 'Error Occurred while creating new booking';
-              }
+              showError(status);
           });          
       } else {
           myUser.getCurrent(function(data, status){
@@ -85,12 +91,7 @@ angular.module('hnpApp').controller('newBookingController',
                   $scope.newBooking.pickupAddress = '';
                   $scope.newBooking.destination = '';
               }, function (status){
-                  if(status == 406){
-                     $scope.message = 'Car already booked for these dates. Please select new date.';
-                  }
-                  else{
-                    $scope.message = 'Error Occurred while creating new booking';
-                  }
+                  showError(status);
               });
           }, function (status){
               $scope.message = 'Error Occurred while creating new booking';

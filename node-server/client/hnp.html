@@ -15,6 +15,7 @@
     <link href="css/style.css" rel="stylesheet">
     <link href="color/default.css" rel="stylesheet">
     <link rel='stylesheet' href='css/fullcalendar.min.css' />
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
     <base href="/">    
   </head>
   <body id="page-top" data-spy="scroll" data-target=".navbar-custom" ng-app="hnpApp" >
@@ -122,30 +123,22 @@
                       </div>
                     </div>
                     <div class="col-md-6">
-                      <div class="form-group"> 
+                      <div class="row"> 
                         <label class="hnp-label" for="name">                                Destination
                         </label> 
                         <input type="text" class="form-control value" id="inp-destination" placeholder="Destination Address" required="required" ng-model="newBooking.destination" ng-keyup="suggestDestination()" />
+                        <br />
                       </div>
                       <div class="row btn-group" >
-                        <div class="col-md-4">
+                        <div class="col-md-4" ng-repeat="car in cars">
                           <label class="btn btn-default" >
-                          <input type="radio" id="car-sel-tavera" ng-model="newBooking.carId" value="1"/>
-                          <img src="img/icons/tavera.png" alt="Share" class="img-responsive center-block" /> <span class="value">Tavera</span>
+                          <input type="radio" id="{{'car-sel-' + car.id}}" ng-model="newBooking.carId" ng-value="car.id"/>
+                          <img ng-src="{{'img/icons/' + car.model + '.png'}}" alt="Share" class="img-responsive center-block" /> <span class="value">{{car.registrationNumber.substring(6, 13)}} </span>
                           </label>
                         </div>
-                        <div class="col-md-4">
-                          <label class="btn btn-default" >
-                          <input type="radio" id="car-sel-indica" ng-model="newBooking.carId" value="3"/>
-                          <img src="img/icons/indica.png" alt="Share" class="img-responsive center-block" /> <span class="value">Indica</span>
-                          </label>
-
-                        </div>
-                        <div class="col-md-4">
-                          <label class="btn btn-default" >
-                          <input type="radio" id="car-sel-indigo" ng-model="newBooking.carId" value="5"/>
-                          <img src="img/icons/indigo.png" alt="Share" class="img-responsive center-block" /> <span class="value">Indigo</span>
-                          </label>
+                        
+                        <div class="col-md-12" ng-if="carLength == 0">
+                          <span class="value-bg text-center">No Cars added for Booking. Please got to <strong> Cars Section </strong> to add a new Car.</span>
                         </div>
                       </div>
                     </div>
@@ -182,8 +175,8 @@
                            <div class="col-md-12">
                               <div class="row">
                                   <div class="col-md-3"><img ng-src="{{ 'img/icons/' + booking.car.id + '.png'}}" alt="Share" class="img-responsive pull-left" id="ongng-car"/></div>
-                                  <div class="col-md-7"><label class="reg-nbr" id="ongng-car-reg">{{booking.car.registrationNumber}}</label></div>
-                                  <div class="col-md-2"><span class="pull-right"><button type="submit" class="btn-md btn-success pull-left active" id="ongng-car-sts">{{booking.status}}</button></span></div>
+                                  <div class="col-md-7"><label class="reg-nbr" id="ongng-car-reg">{{booking.car.registrationNumber}} </label></div>
+                                  <div class="col-md-2"><span class="pull-right"><button type="submit" class="btn-md btn-success pull-left active" id="ongng-car-sts">{{booking.status}} </button></span></div>
                               </div>
                            </div>
                       </div>
@@ -192,15 +185,15 @@
                            <div class="col-md-12">
                               <div class="row">
                                   <div class="col-md-2" id="key">Pickup</div>
-                                  <div class="col-md-4 value" id="ongng-pickup-time"><!--span class="glyphicon glyphicon-time"></span--> {{booking.fEventDate}}</div>
+                                  <div class="col-md-4 value" id="ongng-pickup-time"><!--span class="glyphicon glyphicon-time"></span--> {{booking.fEventDate}} </div>
                                   <div class="col-md-3" id="key">Destination1</div>
-                                  <div class="col-md-3 value" id="ongng-dest1-time"><span class="pull-right"><span class="glyphicon glyphicon-time"></span> {{booking.destination1Time}}</span></div>
+                                  <div class="col-md-3 value" id="ongng-dest1-time"><span class="pull-right"><span class="glyphicon glyphicon-time"></span> {{booking.destination1Time}} </span></div>
                               </div>
                               <div class="row">
                                   <div class="col-md-2" id="key">Drop</div>
-                                  <div class="col-md-4 value" id="ongng-drop-time"><!--span class="glyphicon glyphicon-time"></span-->{{booking.fDropOffDate}}</div>
+                                  <div class="col-md-4 value" id="ongng-drop-time"><!--span class="glyphicon glyphicon-time"></span-->{{booking.fDropOffDate}} </div>
                                   <div class="col-md-2" id="key">DropOff</div>
-                                  <div class="col-md-4 value" id="ongng-dest2-time"><span class="pull-right"><span class="glyphicon glyphicon-time"></span> {{booking.dropOffTime}}</span></div>
+                                  <div class="col-md-4 value" id="ongng-dest2-time"><span class="pull-right"><span class="glyphicon glyphicon-time"></span> {{booking.dropOffTime}} </span></div>
                               </div>
                            </div>
                       </div>
@@ -212,12 +205,12 @@
                       </div>
                       <div class="row">
                            <div class="col-md-4" id="key">License#:</div>
-                           <div class="col-md-8 value"><span class="pull-right" id="ongng-driver-lic">{{booking.driver.licenseNumber}}</span></div>
+                           <div class="col-md-8 value"><span class="pull-right" id="ongng-driver-lic">{{booking.driver.licenseNumber}} </span></div>
                       </div>
                       <div class="row">
                            <div class="col-md-4" id="key">Address:</div>
                            <div class="col-md-8 value">
-                                <div class="span12 text-right" id="ongng-driver-add">{{booking.driver.address}}</div>
+                                <div class="span12 text-right" id="ongng-driver-add">{{booking.driver.address}} </div>
                            </div>
                       </div>
               </div>
@@ -228,7 +221,7 @@
                       </div>
                       <div class="row">
                            <div class="col-md-5" id="key">Last Loc:</div>
-                           <div class="col-md-7 value"><div class="span12 text-right" id="{{'ongng-car-loc' + booking.id}}">{{booking.lastKnownLocation}}</div></div>
+                           <div class="col-md-7 value"><div class="span12 text-right" id="{{'ongng-car-loc' + booking.id}}">{{booking.lastKnownLocation}} </div></div>
                       </div>
                       <div class="row">
                            <div class="col-md-12 text-center"><a href="" class="" id="{{'ongng-dropdown-btn' + booking.id}}" ng-click="ddClick(booking.id)"><span class="glyphicon glyphicon-chevron-down"></span></a></div>
@@ -323,11 +316,11 @@
           
        </div>
     </section>
-    
-    </div>
     <!-- /Section: bookings -->
+    
     <!-- Section: cars -->
-    <section id="cars" class="cars home-section text-center" ng-controller="carsController">
+    <!--section id="cars" class="cars home-section text-center" ng-controller="carsController" -->
+    <section id="cars" class="cars home-section text-center">
         <div class="heading-contact">
         <div class="container">
         <div class="row">
@@ -350,19 +343,19 @@
                 <div class="col-md-5 divider-vertical">
                     <div class="row">
                         <div class="col-md-6 text-left" id="key-bg">Odometer Reading:</div>
-                        <div class="col-md-6 text-right value-bg" id="car-odo">{{car.currentOdometer}}</div>
+                        <div class="col-md-6 text-right value-bg" id="car-odo">{{car.currentOdometer}} </div>
                     </div>
                     
                     <div class="row">
                       <hr>
                        <div class="col-md-6 text-left" id="key-bg">Owner Name:</div>
-                        <div class="col-md-6 text-right value-bg" id="car-owner-name">{{car.ownerName}}</div>
+                        <div class="col-md-6 text-right value-bg" id="car-owner-name">{{car.ownerName}} </div>
                     </div>
                     
                     <div class="row">
                         <br>
                         <div class="col-md-6 text-left" id="key-bg">Owner Address:</div>
-                        <div class="col-md-6 text-right value-bg" id="car-owner-add">{{car.ownerAddress}}</div>
+                        <div class="col-md-6 text-right value-bg" id="car-owner-add">{{car.ownerAddress}} </div>
                     </div>
                     
                     <div class="row">
@@ -375,7 +368,7 @@
                     
                     <div class="row">
                         <br>
-                        <div class="col-md-6 text-left" id="key">Next Service:{{car.nextServiceDate}}</div>
+                        <div class="col-md-6 text-left" id="key">Next Service:{{car.nextServiceDate}} </div>
                         <div class="col-md-6 text-right value-md" id="car-next-service">1 month 17 days</div>
                     </div>
                     
@@ -391,23 +384,11 @@
                             </tr>
                           </thead>
                           <tbody class="value-md">
-                            <tr>
-                              <td id="car-book-date">02-Feb-2015</td>
-                              <td id="car-dest">Abu</td>
-                              <td id="car-book-kms">885 kms</td>
-                              <td><a href="#" class="btn-xs btn-info key-soft" id="car-open-booking" role="button">Open Booking</a></td>
-                            </tr>
-                            <tr>
-                              <td>06-Feb-2015</td>
-                              <td>Ambaji</td>
-                              <td>655 kms</td>
-                              <td><a href="#" class="btn-xs btn-info" id="key-soft" role="button">Open Booking</a></td>
-                            </tr>
-                            <tr>
-                              <td>17-Feb-2015</td>
-                              <td>Barod</td>
-                              <td>305 kms</td>
-                              <td><a href="#" class="btn-xs btn-info" id="key-soft" role="button">Open Booking</a></td>
+                            <tr ng-repeat="carEvent in car.events">
+                              <td id="car-book-date">{{carEvent.dropOffDate}}</td>
+                              <td id="car-dest">{{carEvent.destination}}</td>
+                              <td id="car-book-kms">{{carEvent.kilometers}} kms</td>
+                              <td><a href="#" class="btn-xs btn-info key-soft" id="car-open-booking" role="button" ng-click="showEditModal(carEvent.id, null)">Open Booking</a></td>
                             </tr>
                           </tbody>
                         </table>
@@ -415,14 +396,14 @@
                 </div>
                 <div class="col-md-7">
                     <div class="row"><div class="col-md-10"></div>
-                      <div class="col-md-1 pull-right"><a href="#" class="" id="car-edit"><span class="glyphicon glyphicon-edit gi-2x"></span></a></div>
+                      <div class="col-md-1 pull-right"><a href="#" class="" id="car-edit" ng-click="showCarEditModal(car.id)"><span class="glyphicon glyphicon-edit gi-2x"></span></a></div>
                       <div class="col-md-1 pull-right"><a href="#" class="" id="car-delete"><span class="glyphicon glyphicon-remove gi-2x"></span></a></div>
                     </div>  
                     <div class="row"><div class="col-md-12">
                        <img ng-src="{{ 'img/cars/' + car.model + '.png'}}" alt="Cars" class="img-responsive center-block" id="car-image"/>
                     </div></div>
                      <div class="row"><div class="col-md-12">
-                       <h4 class="value-bg" id="car-reg-nbr">{{car.make}} {{car.model}} {{car.version}} : {{car.registrationNumber}}</h4>
+                       <h4 class="value-bg" id="car-reg-nbr">{{car.make}} {{car.model}} {{car.version}} : {{car.registrationNumber}} </h4>
                     </div></div>
                     <div class="row">
                       <div class="col-md-2 text-right" id="key">
@@ -453,9 +434,10 @@
         </div>
     </section>
     <!-- /Section: cars -->
-    
+
     <!-- Section: drivers -->
-    <section id="drivers" class="home-section text-center bg-dark" ng-controller="driversController">
+    <!--section id="drivers" class="home-section text-center bg-dark" ng-controller="driversController"-->
+    <section id="drivers" class="home-section text-center bg-dark">
       <div class="heading-contact">
         <div class="container">
         <div class="row">
@@ -477,19 +459,19 @@
                 <div class="col-md-5 divider-vertical">
                     <div class="row">
                         <div class="col-md-6 text-left" id="key-bg">Driving Licence #:</div>
-                        <div class="col-md-6 text-right value-bg" id="driver-lic">{{driver.licenseNumber}}</div>
+                        <div class="col-md-6 text-right value-bg" id="driver-lic">{{driver.licenseNumber}} </div>
                     </div>
                     
                     <div class="row">
                       <hr>
                        <div class="col-md-6 text-left" id="key-bg">Expiry Date:</div>
-                        <div class="col-md-6 text-right value-bg" id="driver-lic-expiry">{{driver.expiryDate}}</div>
+                        <div class="col-md-6 text-right value-bg" id="driver-lic-expiry">{{driver.expiryDate}} </div>
                     </div>
                     
                     <div class="row">
                         <br>
                         <div class="col-md-6 text-left" id="key-bg">Driver Address:</div>
-                        <div class="col-md-6 text-right value-bg" id="driver-add">{{driver.address}}</div>
+                        <div class="col-md-6 text-right value-bg" id="driver-add">{{driver.address}} </div>
                     </div>
                     
                     <div class="row">
@@ -503,23 +485,11 @@
                             </tr>
                           </thead>
                           <tbody class="value-md">
-                            <tr>
-                              <td id="driver-date">02-Feb-2015</td>
-                              <td id="driver-dest">Abu</td>
-                              <td id="driver-book-kms">885 kms</td>
-                              <td><a href="#" class="btn-xs btn-info key-soft" id="driver-open-booking" role="button">Open Booking</a></td>
-                            </tr>
-                            <tr>
-                              <td>06-Feb-2015</td>
-                              <td>Ambaji</td>
-                              <td>655 kms</td>
-                              <td><a href="#" class="btn-xs btn-info" id="key-soft" role="button">Open Booking</a></td>
-                            </tr>
-                            <tr>
-                              <td>17-Feb-2015</td>
-                              <td>Barod</td>
-                              <td>305 kms</td>
-                              <td><a href="#" class="btn-xs btn-info" id="key-soft" role="button">Open Booking</a></td>
+                            <tr ng-repeat="driverEvent in driver.events">
+                              <td id="driver-date">{{driverEvent.dropOffDate}}</td>
+                              <td id="driver-dest">{{driverEvent.destination}}</td>
+                              <td id="driver-book-kms">{{driverEvent.kilometers}} kms</td>
+                              <td><a href="#" class="btn-xs btn-info key-soft" id="driver-open-booking" role="button" ng-click="showEditModal(driverEvent.id, null)">Open Booking</a></td>
                             </tr>
                           </tbody>
                         </table>
@@ -546,7 +516,7 @@
                        
                       </div>
                       <div class="col-md-4">
-                         <div class="value-bg" class="text-center" id="driver-name">{{driver.firstName + ' ' + driver.lastName}}</div>
+                         <div class="value-bg" class="text-center" id="driver-name">{{driver.firstName + ' ' + driver.lastName}} </div>
                       </div>
                     </div>
                     
@@ -641,15 +611,15 @@
           </div>
           <div class="col-lg-4">
             <div class="widget-contact">    <h5>Main Office</h5>
-              <address>      <strong>H&P Travels</strong> 
+              <address>      <strong>H&P Travels - {{myUser.firstName + ' ' + myUser.lastName }} </strong> 
                 <br>      Srinand Residency, New Maninagar, NH 8, 
                 <br>      Ahmedabad, Gujarat 380008 
                 <br> 
-                <abbr title="Phone">P:</abbr> 9898-298982
+                <abbr title="Phone">M:</abbr> {{myUser.mobile}}
               </address>
               <address>      <strong>Email</strong> 
                 <br> 
-                <a href="mailto:#">paulik.patel@hnptravels.com</a>
+                <a href="mailto:#">{{myUser.email}}</a>
               </address>
               <address>      <strong>We're on social networks</strong> 
                 <br>
@@ -677,6 +647,7 @@
         </div>
       </div>
     </section>
+    </div>
     <!-- /Section: contact -->
     <footer>
       <div class="container">

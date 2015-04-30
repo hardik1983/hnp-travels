@@ -1,0 +1,98 @@
+     <!-- Booking Edit Modal -->
+<!--div id="fullCalModal" class="modal fade" ng-controller="upcomingBookingController" >
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" -->
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" ng-click="cancel()"><span aria-hidden="true">&times;</span></button>
+                <h4 id="modalTitle" class="modal-title">{{car.model + ' :: ' + car.registrationNumber}}</h4>
+            </div>
+            <div id="modalBody" class="modal-body" ng-controller="upcomingBookingController">
+                  <div class="hnpcontainer-md">
+
+                          <div class="hnpfields-md">
+                              <div class="row">
+                              <div class="col-md-7" >
+                                      <div class="row">
+                                           <div class="col-md-8" id="key"><div class=" text-left pull-bottom"><h3 id="upcmg-book-dest">Car ID: {{car.id}}</h3></div></div>
+                                           <div class="col-md-4"><span class="pull-right"><button type="submit" class="btn-md btn-success pull-left active" id="ongng-car-sts">{{car.status}} </button></span></div>
+                                      </div>
+                                      <div class="row">
+                                            <hr>
+                                            <div class="row">
+                                              <div class="col-md-5 key" id="">Make: 
+                                                  <select id="make" name="Make" class="form-control" required="required" ng-model="car.make" ng-options="mk as mk for mk in makes"> 
+                                                    <option value="">Choose Make:</option>
+                                                  </select>
+                                              </div>
+                                              <div class="col-md-4 key" id="">Model: 
+                                                  <select id="model" name="Model" class="form-control" required="required" ng-model="car.model" ng-options="md as md for md in models" > 
+                                                    <option value="">Choose Model:</option> 
+                                                  </select>
+                                              </div>
+                                              <div class="col-md-3 key" id="">Version: 
+                                                   <input type="text" class="form-control value" id="ec-version" placeholder="Lxi" required="required" ng-model="car.version" />
+                                              </div>
+                                            </div>
+                                      </div>
+                                      <div class="row">
+                                            <hr>
+                                            <div class="row">
+                                              <div class="col-md-8 key" id="">Registration #: <input type="text" class="form-control value" id="ec-reg" placeholder="XX-##-XX-####" required="required" ng-model="car.registrationNumber" /> </div>
+                                              <div class="col-md-4 key" id="">Odometer: <input type="text" class="form-control value" id="ec-odo" placeholder="##,###" ng-model="car.currentOdometer" /></div>
+                                            </div>
+                                      </div>
+                                      <div class="row">
+                                            <hr>
+                                            <div class="row">
+                                              <div class="col-md-4 key" id="">Last Service: <input type="date" class="form-control value" id="ec-last-srvc" placeholder="" ng-model="car.flastServiceDate" /> </div>
+                                              <div class="col-md-4 key" id="">Next Service: <input type="date" class="form-control value" id="ec-next-srvc" placeholder="" ng-model="car.fnextServiceDate" /></div>
+                                              <div class="col-md-4 key" id="">Status: 
+                                                  <select id="status" name="Status" class="form-control" required="required" ng-model="car.status" ng-options="st.status for st in statuses"> 
+                                                    <option value="">Choose Status:</option> 
+                                                  </select>
+                                              </div>
+                                            </div>
+                                      </div>
+                                      <div class="row">
+                                            <hr>
+                                            <div class="row">
+                                              <div class="col-md-4 key" id="">Owner Name: <input type="text" class="form-control value" id="ec-owner-name" placeholder="Name" ng-model="car.ownerName" /> </div>
+                                              <div class="col-md-8 key" id="">Owner Address: <textarea type="text" class="form-control value" id="ec-owner-add" placeholder="Address" rows="2" ng-model="car.ownerAddress" /></div>
+                                            </div>
+                                      </div>
+                              </div>
+                              <div class="col-md-5">
+                                      <br>
+                                      <div class="row">
+                                              <div class="row">
+                                                  <div class="col-md-12 key text-center">Car Details</div>
+                                              </div>
+                                              
+                                              <div class="row" >
+                                                  <div class="col-md-12 text-center">
+                                                         <div class="col-md-2"></div>
+                                                         <div class="col-md-10">   
+                                                            <img ng-src="{{'img/cars/' + car.model + '.png'}}" alt="Share" class="img-responsive" /> <br/> <span class="value-bg">{{car.registrationNumber}}</span>
+                                                          </div>
+                                                  </div>
+                                              </div>
+                                      </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="row">
+                                      <br>
+                                          <div class="col-md-12 key text-center" id="em-show-alert">
+                                              
+                                          </div>
+                          </div>
+                      </div>
+                  </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="cancel()">Cancel</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal" ng-click="deleteEvent()">Delete</button>
+                <button class="btn btn-success"><a id="eventUrl" class="value-md" target="_blank" ng-click="ok()">Update</a></button>
+            </div>
+        <!-- /div>
+    </div>
+</div -->

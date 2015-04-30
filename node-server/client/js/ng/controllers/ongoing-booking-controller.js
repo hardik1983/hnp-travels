@@ -8,6 +8,7 @@ angular.module('hnpApp').controller('ongoingBookingController',
     
     var drivers = {};
     var cars = {};
+    $scope.carLength = 0;
     var bookings = {};
     //var customers = {};
     var eventList = [];
@@ -29,7 +30,12 @@ angular.module('hnpApp').controller('ongoingBookingController',
         eventItem.start = utilityService.formatDateString(booking.eventDate);
         eventItem.end = utilityService.formatDateStringEnd(booking.dropOffDate);
         eventItem.editable = true;
-        eventItem.description = booking.pickupAddress + ' to ' + booking.destination + '<br />' + booking.customer.firstName;
+        if(booking.customer !== undefined){
+          eventItem.description = booking.pickupAddress + ' to ' + booking.destination + '<br />' + booking.customer.firstName;
+        } else {
+          eventItem.description = booking.pickupAddress + ' to ' + booking.destination + '<br />';
+        }
+        
         
         var endInt = parseInt((booking.dropOffDate + '').replace(/-/g,''));
         if(endInt < todayInt){
@@ -60,12 +66,16 @@ angular.module('hnpApp').controller('ongoingBookingController',
     $scope.cars = cars;
     $scope.drivers = drivers;
     
+    // Get Current User
     myUser.getCurrent(function(data, status){
+        $scope.myUser = data;
         //Populate all the cars of this user
-        myUser.cars({ id: data.id}, function(carData, status){
+        myUser.cars({ id: data.id }, function(carData, status){
+            $scope.carLength = carData.length;
             for(var i=0; i < carData.length; i++){
               cars[carData[i].id] = carData[i];
             }
+            
         });
         
         //Populate all the drivers of this user
@@ -75,6 +85,7 @@ angular.module('hnpApp').controller('ongoingBookingController',
             }
         });
         
+        //Get all the Events
         myUser.events({ id: data.id, filter: {include: ['customer', 'car', 'driver'] }}, function(eventData, status){
             $('#calendar').fullCalendar('removeEventSource', eventList);
             userId = data.id;
@@ -102,10 +113,26 @@ angular.module('hnpApp').controller('ongoingBookingController',
               
               //Populate Hash Map with key = booking.id
               bookings[eventData[i].id] = eventData[i];
+              
+              //Push the Event into Car for History
+              if(cars[eventData[i].carId].events === undefined){
+                cars[eventData[i].carId].events = [];
+              }
+              cars[eventData[i].carId].events.push(eventData[i]);
+              
+              //Push the Event into Driver for History
+              if(eventData[i].driverId != null && eventData[i].driverId != 0){
+                  if(drivers[eventData[i].driverId].events === undefined){
+                    drivers[eventData[i].driverId].events = [];
+                  }
+                  drivers[eventData[i].driverId].events.push(eventData[i]);
+              }
             }
             
             $('#calendar').fullCalendar('addEventSource', eventList);
         });
+        
+        
           
     });
     
@@ -417,9 +444,47 @@ angular.module('hnpApp').controller('ongoingBookingController',
         
     };
     
+    /* Car Section */
+    $scope.showCarEditModal = function(carId){
+        $scope.opts = {
+            backdrop: true,                         
+            backdropClick: true,
+            dialogFade: false,
+            keyboard: true,
+            templateUrl : '/editCarContent.html',
+            controller : 'EditCarController',
+            size: 'lg',
+            resolve: {} // empty storage
+        };
+
+        $scope.opts.resolve.cars = function() {
+            return angular.copy({
+              car: $scope.cars[carId]
+            }); // pass name to Dialog
+        };    
+        
+        var modalInstance = $modal.open($scope.opts);
+        
+        modalInstance.result.then(function(result){
+            if(result != null){
+                cars[result.id] = result;
+                $scope.cars = cars;
+            } else {
+                delete cars[carId];
+                $scope.cars = cars;
+                
+            }
+        });
+        
+    };
+    
+    
+    
   }]
 );
 
+
+/*-----------------------------Booking Section--------------------------------*/
 angular.module('hnpApp').controller('EditBookingController',
   ['$scope', '$modalInstance', '$modal', 'bookings', 'cars', 'drivers', 'utilityService', 'Event', 'Customer', function ($scope, $modalInstance, $modal, bookings, cars, drivers, utilityService, myEvent, myCust) {
      
@@ -453,6 +518,16 @@ angular.module('hnpApp').controller('EditBookingController',
       input = input.replace(/:/g, "");
       return parseInt(input); 
     };
+    var showError = function(error){
+      if(error.data != null && error.data !== undefined 
+          && error.data.error != null && error.data.error !== undefined
+          && error.data.error.sqlState == '12000'){
+      
+          $('#em-show-alert').html(alertDuplicate);
+      } else {
+          $('#em-show-alert').html(alertError);
+      }
+    };
     
     $scope.changeKms = function(){
         var startKm = 0;
@@ -466,6 +541,7 @@ angular.module('hnpApp').controller('EditBookingController',
         }
         
     };
+    
   
     //Variables
     var res;
@@ -540,6 +616,8 @@ angular.module('hnpApp').controller('EditBookingController',
           $scope.booking.status = 'Scheduled';
         }
         
+        
+        
         //Check if mobile # changed
         if(oldMobile != $scope.customer.cell){
             // Check if mobile was removed or empty
@@ -552,7 +630,7 @@ angular.module('hnpApp').controller('EditBookingController',
                   alert('Event updated successfully!');
                   $modalInstance.close($scope.booking);
                 }, function (error) {
-                  $('#em-show-alert').html(alertError);
+                  showError(error);
                 });
             } else { // Else
                 // Find new customer Id
@@ -566,7 +644,7 @@ angular.module('hnpApp').controller('EditBookingController',
                       alert('Event updated successfully!');
                       $modalInstance.close($scope.booking);
                     }, function (error) {
-                      $('#em-show-alert').html(alertError);
+                      showError(error);
                     });
                     
                  }, function(error) {
@@ -591,7 +669,7 @@ angular.module('hnpApp').controller('EditBookingController',
                           alert('Event updated successfully!');
                           $modalInstance.close($scope.booking);
                         }, function (error) {
-                          $('#em-show-alert').html(alertError);
+                          showError(error);
                         });
                     }, function (error) {
                         //Error - set customerId = null and Call Update
@@ -602,7 +680,7 @@ angular.module('hnpApp').controller('EditBookingController',
                           alert('Event updated successfully!');
                           $modalInstance.close($scope.booking);
                         }, function (error) {
-                          $('#em-show-alert').html(alertError);
+                          showError(error);
                         });
                     });
                  });
@@ -614,7 +692,7 @@ angular.module('hnpApp').controller('EditBookingController',
               alert('Event updated successfully!');
               $modalInstance.close($scope.booking);
             }, function (error) {
-              $('#em-show-alert').html(alertError);
+              showError(error);
             });
         }    
     };
@@ -635,7 +713,7 @@ angular.module('hnpApp').controller('EditBookingController',
 
 
 angular.module('hnpApp').controller('NewBookingController',
-  ['$scope', '$modalInstance', '$modal', 'cars', 'drivers', 'Event', 'User', 'Customer', function ($scope, $modalInstance, $modal, cars, drivers, myEvent, myUser, myCust) {
+  ['$scope', '$modalInstance', '$modal', 'cars', 'drivers', 'utilityService', 'Event', 'User', 'Customer', function ($scope, $modalInstance, $modal, cars, drivers, utilityService, myEvent, myUser, myCust) {
     
     //Functions
     var convertTimeToString = function(input){
@@ -666,6 +744,16 @@ angular.module('hnpApp').controller('NewBookingController',
       }
       input = input.replace(/:/g, "");
       return parseInt(input); 
+    };
+    var showError = function(error){
+      if(error.data != null && error.data !== undefined 
+          && error.data.error != null && error.data.error !== undefined
+          && error.data.error.sqlState == '12000'){
+      
+          $('#em-show-alert').html(alertDuplicate);
+      } else {
+          $('#em-show-alert').html(alertError);
+      }
     };
     
     $scope.changeKms = function(){
@@ -760,7 +848,7 @@ angular.module('hnpApp').controller('NewBookingController',
                             });                          
                             
                       }, function(status){
-                        $('#em-show-alert').html(alertError);               
+                        showError(status);            
                       });
                     }); 
                   }, function (status){
@@ -793,7 +881,7 @@ angular.module('hnpApp').controller('NewBookingController',
                               }); 
                               
                         }, function(status){
-                          $('#em-show-alert').html(alertError);               
+                          showError(status);            
                         });
                       }); 
                     }, function(status){
@@ -812,7 +900,7 @@ angular.module('hnpApp').controller('NewBookingController',
                                 $modalInstance.close($scope.booking);
                               }); 
                         }, function(status){
-                          $('#em-show-alert').html(alertError);              
+                          showError(status);         
                         });
                       }); 
                     });
@@ -832,7 +920,7 @@ angular.module('hnpApp').controller('NewBookingController',
                             $modalInstance.close($scope.booking);
                           }); 
                     }, function(status){
-                      $('#em-show-alert').html(alertError);              
+                      showError(status);            
                     }); 
                   });
               }
@@ -842,6 +930,72 @@ angular.module('hnpApp').controller('NewBookingController',
     };
     $scope.cancel = function () {
         $modalInstance.dismiss('cancel');
+    };
+  }]
+);
+
+
+/*-----------------------------Car Section------------------------------------*/
+angular.module('hnpApp').controller('EditCarController',
+  ['$scope', '$modalInstance', '$modal', 'cars', 'utilityService', 'Car', function ($scope, $modalInstance, $modal, cars, utilityService, myCar) {
+    
+    $scope.car = cars.car;
+    $scope.car.flastServiceDate = utilityService.getDate($scope.car.lastServiceDate);
+    $scope.car.fnextServiceDate = utilityService.getDate($scope.car.nextServiceDate);
+  
+     
+    //Functions
+    var showError = function(error){
+      if(error.data != null && error.data !== undefined 
+          && error.data.error != null && error.data.error !== undefined
+          && error.data.error.sqlState == '12000'){
+      
+          $('#em-show-alert').html(alertDuplicate);
+      } else {
+          $('#em-show-alert').html(alertError);
+      }
+    };
+    
+    $scope.makes = [ 'Chevrolet', 'Tata'];
+    $scope.models = [ 'Tavera', 'Indica', 'Indigo'];
+    
+    var statuses = [
+      {status: 'Gaurage'},
+      {status: 'On Road'},
+      {status: 'Service'}
+    ];  
+    $scope.statuses = statuses;
+    
+    //Variables
+    var alertDuplicate = '<div class="alert alert-danger alert-error"><a href="#" class="close" data-dismiss="alert">&times;</a><strong>Error!</strong>Car already booked between these dates. Please select new dates.</div>';
+    var alertError = '<div class="alert alert-danger alert-error"><a href="#" class="close" data-dismiss="alert">&times;</a><strong>Error!</strong>Internal Error while proceesing the booking.</div>';
+    var alertDelete = '<div class="alert alert-danger alert-error"><a href="#" class="close" data-dismiss="alert">&times;</a><strong>Error!</strong>Cannot Delete the Car.</div>';
+    var alertSuccess = '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert">&times;</a><strong>Success!</strong> Car is edited successfully</div>';
+    
+    //Initialize
+   
+     
+    
+    $scope.ok = function (result) {
+       myCar.upsert($scope.car, function(data, status){
+          $('#em-show-alert').html(alertSuccess);
+          alert('Car edited successfully!');
+          $modalInstance.close($scope.car);
+       }, function (error){
+          $('#em-show-alert').html(alertError);
+       }); 
+    };
+    $scope.cancel = function () {
+        $modalInstance.dismiss('cancel');
+    };
+    $scope.deleteEvent = function () {
+        myCar.deleteById({id: $scope.car.id}, function(){
+           alert('Car deleted successfully!');
+           $modalInstance.close(null);
+        }, function(data, status){
+          $('#em-show-alert').html(alertDelete);
+        });
+    
     };
   }]
 );
