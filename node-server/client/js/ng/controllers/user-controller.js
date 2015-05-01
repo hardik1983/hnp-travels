@@ -1,5 +1,5 @@
 angular.module('hnpApp').controller('userController',
-  ['$scope', '$http', 'userService', 'User', '$location', '$window', '$modal', 'LoopBackAuth' , function ($scope, $http, userService, myUser, $location, $window, $modal, LoopBackAuth) {
+  ['$scope', '$http', 'User', '$location', '$window', '$modal', 'LoopBackAuth' , function ($scope, $http, myUser, $location, $window, $modal, LoopBackAuth) {
     'use strict';
     
     

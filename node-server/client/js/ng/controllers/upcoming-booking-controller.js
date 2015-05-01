@@ -1,5 +1,5 @@
 angular.module('hnpApp').controller('upcomingBookingController',
-  ['$scope', '$http', 'bookingService' , function ($scope, $http, bookingService) {
+  ['$scope', '$http', function ($scope, $http ) {
     'use strict';
     
     }]

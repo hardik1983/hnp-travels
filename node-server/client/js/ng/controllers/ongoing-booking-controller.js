@@ -1050,8 +1050,8 @@ angular.module('hnpApp').controller('EditCarController',
     $scope.car = cars.car;
     $scope.car.flastServiceDate = utilityService.getDate($scope.car.lastServiceDate);
     $scope.car.fnextServiceDate = utilityService.getDate($scope.car.nextServiceDate);
-    $scope.makes = [ 'Chevrolet', 'Tata'];
-    $scope.models = [ 'Tavera', 'Indica', 'Indigo'];
+    $scope.makes = [ 'Chevrolet', 'Tata', 'Toyota', 'Renault'];
+    $scope.models = [ 'Tavera', 'Indica', 'Indigo', 'Innova', 'Logan'];
     
     var statuses = [
       {status: 'Gaurage'},
@@ -1116,8 +1116,8 @@ angular.module('hnpApp').controller('NewCarController',
     $scope.car = car;
     $scope.car.flastServiceDate = new Date();
     $scope.car.fnextServiceDate = new Date();
-    $scope.makes = [ 'Chevrolet', 'Tata'];
-    $scope.models = [ 'Tavera', 'Indica', 'Indigo'];
+    $scope.makes = [ 'Chevrolet', 'Tata', 'Toyota', 'Renault'];
+    $scope.models = [ 'Tavera', 'Indica', 'Indigo', 'Innova', 'Logan'];
     
     var statuses = [
       'Gaurage',

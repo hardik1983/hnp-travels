@@ -37,8 +37,5 @@
 
 })(jQuery);
 
-$(document).ready(function (){
-     
-});
 
 

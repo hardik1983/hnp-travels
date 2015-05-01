@@ -96,10 +96,10 @@
 
           <div class="hnpfields">
             <div class="row">
-              <div class="col-lg-9">
+              <div class="col-lg-12">
                 <form id="contact-form" ng-submit="book()">
                   <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                       <div class="form-group" >
                         <label class="hnp-label" for="name">                                Pickup
                         </label> 
@@ -122,15 +122,15 @@
                         </div>
                       </div>
                     </div>
-                    <div class="col-md-6">
-                      <div class="row"> 
+                    <div class="col-md-8">
+                      <div class="row col-md-7"> 
                         <label class="hnp-label" for="name">                                Destination
                         </label> 
                         <input type="text" class="form-control value" id="inp-destination" placeholder="Destination Address" required="required" ng-model="newBooking.destination" ng-keyup="suggestDestination()" />
                         <br />
                       </div>
-                      <div class="row btn-group" >
-                        <div class="col-md-4" ng-repeat="car in cars">
+                      <div class="row btn-group col-md-12" >
+                        <div class="col-md-2" ng-repeat="car in cars">
                           <label class="btn btn-default" >
                           <input type="radio" id="{{'car-sel-' + car.id}}" ng-model="newBooking.carId" ng-value="car.id"/>
                           <img ng-src="{{'img/icons/' + car.model + '.png'}}" alt="Share" class="img-responsive center-block" /> <span class="value">{{car.registrationNumber.substring(6, 13)}} </span>
@@ -174,7 +174,7 @@
                       <div class="row">
                            <div class="col-md-12">
                               <div class="row">
-                                  <div class="col-md-3"><img ng-src="{{ 'img/icons/' + booking.car.id + '.png'}}" alt="Share" class="img-responsive pull-left" id="ongng-car"/></div>
+                                  <div class="col-md-3"><img ng-src="{{ 'img/icons/' + booking.car.model + '.png'}}" alt="Share" class="img-responsive pull-left" id="ongng-car"/></div>
                                   <div class="col-md-7"><label class="reg-nbr" id="ongng-car-reg">{{booking.car.registrationNumber}} </label></div>
                                   <div class="col-md-2"><span class="pull-right"><button type="submit" class="btn-md btn-success pull-left active" id="ongng-car-sts">{{booking.status}} </button></span></div>
                               </div>
