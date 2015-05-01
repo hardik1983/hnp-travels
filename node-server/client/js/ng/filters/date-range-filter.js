@@ -1,5 +1,6 @@
 angular.module('hnpApp').filter("dateRange", function() {
   return function(items, currentDate) {
+       
         var intDate = currentDate.replace(/-/g,'');
         var result = [];
       

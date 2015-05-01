@@ -1,4 +1,4 @@
-var myApp = angular.module('hnpApp', ['ui.bootstrap', 'ngRoute', 'lbServices']);
+var myApp = angular.module('hnpApp', ['ui.bootstrap', 'ngRoute', 'lbServices', 'ngFileUpload']);
 
 myApp.config(['$httpProvider', function($httpProvider) {
         $httpProvider.defaults.useXDomain = true;

@@ -1,11 +1,13 @@
 angular.module('hnpApp').controller('userController',
-  ['$scope', '$http', 'userService', 'User', '$location', '$window', '$modal' , function ($scope, $http, userService, myUser, $location, $window, $modal) {
+  ['$scope', '$http', 'userService', 'User', '$location', '$window', '$modal', 'LoopBackAuth' , function ($scope, $http, userService, myUser, $location, $window, $modal, LoopBackAuth) {
     'use strict';
     
+    
     var session = false;
-    var tokenId = $location.search().tkn;
+    //var tokenId = $location.search().tkn;
 
-    if(tokenId != null){
+    var userId = LoopBackAuth.currentUserId;
+    if(userId != null){
       var currentUser = myUser.getCurrent();
       $scope.user = currentUser;
       session = true;

@@ -1,8 +1,8 @@
 angular.module('hnpApp').controller('ongoingBookingController',
-  ['$scope', '$http', '$modal', 'utilityService', 'Event', 'User', function ($scope, $http, $modal, utilityService, myEvent, myUser) {
+  ['$scope', '$http', '$modal', 'utilityService', 'Event', 'User', 'LoopBackAuth', function ($scope, $http, $modal, utilityService, myEvent, myUser, LoopBackAuth) {
     'use strict';
     var allBookings = [];
-    var userId = 12;
+    var userId = LoopBackAuth.currentUserId;
     var today = new Date();
     var currentDate = utilityService.formatDate(today);
     
@@ -139,8 +139,6 @@ angular.module('hnpApp').controller('ongoingBookingController',
     
      
     $scope.pickedUp = function(id){
-        console.log('Picked Up customer for event ' + id);
-        
         //Calculate Current Time
         var currTime = new Date();
         var hrs = currTime.getHours();
@@ -165,7 +163,6 @@ angular.module('hnpApp').controller('ongoingBookingController',
     };
     
     $scope.atDestination = function(id){
-        console.log('Customer at destination for event ' + id);
         //Calculate Current Time
         var currTime = new Date();
         var hrs = currTime.getHours();
@@ -189,7 +186,6 @@ angular.module('hnpApp').controller('ongoingBookingController',
     };
     
     $scope.droppedOff = function(id){
-        console.log('Dropped Off customer for event ' + id);
         //Calculate Current Time
         var currTime = new Date();
         var hrs = currTime.getHours();
@@ -368,7 +364,7 @@ angular.module('hnpApp').controller('ongoingBookingController',
         modalInstance.result.then(function(result){
             if(result != null){
                 bookings[result.id] = result;
-                event.title = bookings[event.id].destination;
+                event.title = bookings[result.id].destination;
                 event.start = utilityService.formatDateString(bookings[event.id].eventDate);
                 event.end = utilityService.formatDateStringEnd(bookings[event.id].dropOffDate);
                 $('#calendar').fullCalendar('updateEvent', event);
@@ -418,27 +414,45 @@ angular.module('hnpApp').controller('ongoingBookingController',
         
         var modalInstance = $modal.open($scope.opts);
         
-        modalInstance.result.then(function(result){
+        modalInstance.result.then(function(eventData){
             //bookings[result.id] = result;
             // Refresh event
-            myEvent.find({ id: result.id, filter: {include: ['customer', 'car', 'driver'] }}, function(eventData, status){
+            //myEvent.find({ id: result.id, filter: {include: ['customer', 'car', 'driver'] }}, function(eventData, status){
               bookings[eventData.id] = eventData; 
-            });
-            var newEvent = {};
-            newEvent.id = result.id;
-            newEvent.title = result.destination;
-            newEvent.allDay = true;
-            newEvent.start = utilityService.formatDateString(result.eventDate);
-            newEvent.end = utilityService.formatDateStringEnd(result.dropOffDate);
-            newEvent.editable = true;
-            newEvent.description = result.pickupAddress + ' to ' + result.destination;
-            newEvent.className = ['btn-skin', 'btn-default', 'btn-lg', 'event-item'];
+              //Add events to Driver Logic
+              if(eventData.driverId != 0 && eventData.driverId != null){
+                  var drvEvnts = drivers[eventData.driverId].events;
+                  var found = false;
+                  for(var i=0; i < drvEvnts.length; i++){
+                    if(drvEvnts[i].id == eventData.id){
+                      found = true;
+                    }
+                  }
+                  
+                  if(!found){
+                    drivers[eventData.driverId].events.add(eventData);
+                    $scope.drivers = drivers;
+                  }
+              }
+              
+              
+              $scope.bookings = bookings;
+              var newEvent = {};
+              newEvent.id = eventData.id;
+              newEvent.title = eventData.destination;
+              newEvent.allDay = true;
+              newEvent.start = utilityService.formatDateString(eventData.eventDate);
+              newEvent.end = utilityService.formatDateStringEnd(eventData.dropOffDate);
+              newEvent.editable = true;
+              newEvent.description = eventData.pickupAddress + ' to ' + eventData.destination;
+              newEvent.className = ['btn-skin', 'btn-default', 'btn-lg', 'event-item'];
+              
+              eventList.push(newEvent);
+              $('#calendar').fullCalendar('removeEvents');
+              $('#calendar').fullCalendar('addEventSource', eventList);
+              $('#calendar').fullCalendar('rerenderEvents');
+            //});
             
-            eventList.push(newEvent);
-            
-            $('#calendar').fullCalendar('removeEvents');
-            $('#calendar').fullCalendar('addEventSource', eventList);
-            $('#calendar').fullCalendar('rerenderEvents');
              
         });
         
@@ -478,7 +492,96 @@ angular.module('hnpApp').controller('ongoingBookingController',
         
     };
     
+    $scope.showCarNewModal = function(){
+        $scope.opts = {
+            backdrop: true,                         
+            backdropClick: true,
+            dialogFade: false,
+            keyboard: true,
+            templateUrl : '/newCarContent.html',
+            controller : 'NewCarController',
+            size: 'lg',
+            resolve: {} // empty storage
+        };
+        
+        $scope.opts.resolve.user = function() {
+            return angular.copy({
+              id: userId
+            }); // pass name to Dialog
+        }; 
+
+        var modalInstance = $modal.open($scope.opts);
+        
+        modalInstance.result.then(function(result){
+            if(result != null){
+                cars[result.id] = result;
+                $scope.cars = cars;
+            }
+        });
+    };
     
+    //Driver Section
+    $scope.showDriverEditModal = function(driverId){
+        $scope.opts = {
+            backdrop: true,                         
+            backdropClick: true,
+            dialogFade: false,
+            keyboard: true,
+            templateUrl : '/editDriverContent.html',
+            controller : 'EditDriverController',
+            size: 'lg',
+            resolve: {} // empty storage
+        };
+
+        $scope.opts.resolve.drivers = function() {
+            return angular.copy({
+              driver: $scope.drivers[driverId]
+            }); // pass name to Dialog
+        };    
+        
+        var modalInstance = $modal.open($scope.opts);
+        
+        modalInstance.result.then(function(result){
+            if(result != null){
+                drivers[result.id] = result;
+                $scope.drivers = drivers;
+            } else {
+                delete drivers[driverId];
+                $scope.drivers = drivers;
+                
+            }
+        });
+        
+    };
+    
+    $scope.showDriverNewModal = function(){
+    
+        $scope.opts = {
+            backdrop: true,                         
+            backdropClick: true,
+            dialogFade: false,
+            keyboard: true,
+            templateUrl : '/newDriverContent.html',
+            controller : 'NewDriverController',
+            size: 'lg',
+            resolve: {} // empty storage
+        };
+
+        $scope.opts.resolve.user = function() {
+            return angular.copy({
+              id: userId
+            }); // pass name to Dialog
+        }; 
+        
+        var modalInstance = $modal.open($scope.opts);
+        
+        modalInstance.result.then(function(result){
+            if(result != null){
+                drivers[result.id] = result;
+                $scope.drivers = drivers;
+            }
+        });
+    };
     
   }]
 );
@@ -518,6 +621,12 @@ angular.module('hnpApp').controller('EditBookingController',
       input = input.replace(/:/g, "");
       return parseInt(input); 
     };
+    var timeToString = function(){
+        $scope.booking.eventTime = convertTimeToString($scope.booking.eventTime);
+        $scope.booking.destination1Time = convertTimeToString($scope.booking.destination1Time);
+        $scope.booking.destination2Time = convertTimeToString($scope.booking.destination2Time);
+        $scope.booking.dropOffTime = convertTimeToString($scope.booking.dropOffTime);
+    };
     var showError = function(error){
       if(error.data != null && error.data !== undefined 
           && error.data.error != null && error.data.error !== undefined
@@ -527,6 +636,7 @@ angular.module('hnpApp').controller('EditBookingController',
       } else {
           $('#em-show-alert').html(alertError);
       }
+      timeToString();
     };
     
     $scope.changeKms = function(){
@@ -542,7 +652,6 @@ angular.module('hnpApp').controller('EditBookingController',
         
     };
     
-  
     //Variables
     var res;
     var alertDuplicate = '<div class="alert alert-danger alert-error"><a href="#" class="close" data-dismiss="alert">&times;</a><strong>Error!</strong>Car already booked between these dates. Please select new dates.</div>';
@@ -596,15 +705,15 @@ angular.module('hnpApp').controller('EditBookingController',
             disableDoubleClickZoom: true
     };
     
-    $scope.ok = function (result) {
+    $scope.ok = function (result) {        
         $scope.booking.eventTime = convertTime($scope.booking.eventTime);
         $scope.booking.destination1Time = convertTime($scope.booking.destination1Time);
         $scope.booking.destination2Time = convertTime($scope.booking.destination2Time);
         $scope.booking.dropOffTime = convertTime($scope.booking.dropOffTime);
-        var dod = utilityService.formatDate($scope.booking.repDropOffDate);
-        $scope.booking.dropOffDate = dod.replace(/-/g,'');
-        dod = utilityService.formatDate($scope.booking.refPickupDate);
-        $scope.booking.eventDate = dod.replace(/-/g,''); 
+        var dod = utilityService.convertDateToStore($scope.booking.repDropOffDate);
+        $scope.booking.dropOffDate = dod;
+        dod = utilityService.convertDateToStore($scope.booking.refPickupDate);
+        $scope.booking.eventDate = dod; 
 
         if ( $scope.booking.dropOffTime != 0){
           $scope.booking.status = 'Complete';
@@ -625,7 +734,7 @@ angular.module('hnpApp').controller('EditBookingController',
                 // set customerId = null & Call Update
                 $scope.booking.customer = null;
                 $scope.booking.customerId = null;
-                myEvent.upsert($scope.booking, function(updatedData, status){
+                myEvent.prototype$updateAttributes($scope.booking, function(updatedData, status){
                   $('#em-show-alert').html(alertSuccess);
                   alert('Event updated successfully!');
                   $modalInstance.close($scope.booking);
@@ -639,7 +748,7 @@ angular.module('hnpApp').controller('EditBookingController',
                     //set customerId & Call Update
                     $scope.booking.customer = cust;
                     $scope.booking.customerId = cust.id;
-                    myEvent.upsert($scope.booking, function(updatedData, status){
+                    myEvent.prototype$updateAttributes($scope.booking, function(updatedData, status){
                       $('#em-show-alert').html(alertSuccess);
                       alert('Event updated successfully!');
                       $modalInstance.close($scope.booking);
@@ -664,7 +773,7 @@ angular.module('hnpApp').controller('EditBookingController',
                         //set new custoemrId & Call Update
                         $scope.booking.customer = newCustomer;
                         $scope.booking.customerId = newCustomer.id;
-                        myEvent.upsert($scope.booking, function(updatedData, status){
+                        myEvent.prototype$updateAttributes($scope.booking, function(updatedData, status){
                           $('#em-show-alert').html(alertSuccess);
                           alert('Event updated successfully!');
                           $modalInstance.close($scope.booking);
@@ -675,7 +784,7 @@ angular.module('hnpApp').controller('EditBookingController',
                         //Error - set customerId = null and Call Update
                         $scope.booking.customer = null;
                         $scope.booking.customerId = null;
-                        myEvent.upsert($scope.booking, function(updatedData, status){
+                        myEvent.prototype$updateAttributes($scope.booking, function(updatedData, status){
                           $('#em-show-alert').html(alertSuccess);
                           alert('Event updated successfully!');
                           $modalInstance.close($scope.booking);
@@ -687,7 +796,7 @@ angular.module('hnpApp').controller('EditBookingController',
             }
         } else {
             // Dont touch CustomerId field & Update
-            myEvent.upsert($scope.booking, function(updatedData, status){
+            myEvent.prototype$updateAttributes($scope.booking, function(updatedData, status){
               $('#em-show-alert').html(alertSuccess);
               alert('Event updated successfully!');
               $modalInstance.close($scope.booking);
@@ -813,10 +922,10 @@ angular.module('hnpApp').controller('NewBookingController',
               $scope.booking.destination2Time = convertTime($scope.booking.destination2Time);
               $scope.booking.dropOffTime = convertTime($scope.booking.dropOffTime);
               
-              var dod = utilityService.formatDate($scope.booking.repDropOffDate);
-              $scope.booking.dropOffDate = dod.replace(/-/g,'');
-              dod = utilityService.formatDate($scope.booking.refPickupDate); 
-              $scope.booking.eventDate = dod.replace(/-/g,''); 
+              var dod = utilityService.convertDateToStore($scope.booking.repDropOffDate);
+              $scope.booking.dropOffDate = dod;
+              dod = utilityService.convertDateToStore($scope.booking.refPickupDate); 
+              $scope.booking.eventDate = dod; 
               if ( $scope.booking.dropOffTime != 0){
                 $scope.booking.status = 'Complete';
                } else if($scope.booking.destination1Time != 0 || $scope.booking.destination2Time != 0){
@@ -829,7 +938,6 @@ angular.module('hnpApp').controller('NewBookingController',
                $scope.booking.lastKnownLocation = '';
               // 0. Check if Customer is present
               if($scope.customer.mobile != null && $scope.customer.mobile != ''){
-                  console.log('finding ' + $scope.customer.mobile);
                   myCust.findOne({filter: {where : {cell: $scope.customer.mobile}}}, function(cust, status){
                     //Customer Found, attach that customer;
                     myUser.getCurrent(function(data, status){
@@ -837,11 +945,11 @@ angular.module('hnpApp').controller('NewBookingController',
                       $scope.booking.customerId = cust.id
                       myEvent.create($scope.booking, function(createdEvent, status){
                            $('#em-show-alert').html(alertSuccess);
-                           $scope.booking.id = data.id;
+                           $scope.booking.id = createdEvent.id;
                             alert('Event created successfully!');
                             
                             //Retrieve event with all dependent details
-                            myEvent.find({ id: data.id, filter: {include: ['customer', 'car', 'driver'] }}, function(eventData, status){
+                            myEvent.findById({ id: createdEvent.id, filter: {include: ['customer', 'car', 'driver'] }}, function(eventData, status){
                               $modalInstance.close(eventData);
                             }, function(error){
                               $modalInstance.close($scope.booking);
@@ -870,11 +978,11 @@ angular.module('hnpApp').controller('NewBookingController',
                         $scope.booking.customerId = newCustomer.id
                         myEvent.create($scope.booking, function(createdEvent, status){
                              $('#em-show-alert').html(alertSuccess);
-                             $scope.booking.id = data.id;
+                             $scope.booking.id = createdEvent.id;
                               alert('Event created successfully!');
                               
                               //Retrieve event with all dependent details
-                              myEvent.find({ id: data.id, filter: {include: ['customer', 'car', 'driver'] }}, function(eventData, status){
+                              myEvent.findById({ id: createdEvent.id, filter: {include: ['customer', 'car', 'driver'] }}, function(eventData, status){
                                 $modalInstance.close(eventData);
                               }, function(error){
                                 $modalInstance.close($scope.booking);
@@ -890,11 +998,11 @@ angular.module('hnpApp').controller('NewBookingController',
                         $scope.booking.userId = data.id;
                         myEvent.create($scope.booking, function(createdEvent, status){
                              $('#em-show-alert').html(alertSuccess);
-                             $scope.booking.id = data.id;
+                             $scope.booking.id = createdEvent.id;
                               alert('Event created successfully!');
                               
                               //Retrieve event with all dependent details
-                              myEvent.find({ id: data.id, filter: {include: ['customer', 'car', 'driver'] }}, function(eventData, status){
+                              myEvent.findById({ id: createdEvent.id, filter: {include: ['customer', 'car', 'driver'] }}, function(eventData, status){
                                 $modalInstance.close(eventData);
                               }, function(error){
                                 $modalInstance.close($scope.booking);
@@ -911,10 +1019,10 @@ angular.module('hnpApp').controller('NewBookingController',
                     $scope.booking.userId = data.id;
                     myEvent.create($scope.booking, function(createdEvent, status){
                          $('#em-show-alert').html(alertSuccess);
-                         $scope.booking.id = data.id;
+                         $scope.booking.id = createdEvent.id;
                          alert('Event created successfully!');
                          //Retrieve event with all dependent details
-                          myEvent.find({ id: data.id, filter: {include: ['customer', 'car', 'driver'] }}, function(eventData, status){
+                          myEvent.findById({ id: createdEvent.id, filter: {include: ['customer', 'car', 'driver'] }}, function(eventData, status){
                             $modalInstance.close(eventData);
                           }, function(error){
                             $modalInstance.close($scope.booking);
@@ -942,20 +1050,6 @@ angular.module('hnpApp').controller('EditCarController',
     $scope.car = cars.car;
     $scope.car.flastServiceDate = utilityService.getDate($scope.car.lastServiceDate);
     $scope.car.fnextServiceDate = utilityService.getDate($scope.car.nextServiceDate);
-  
-     
-    //Functions
-    var showError = function(error){
-      if(error.data != null && error.data !== undefined 
-          && error.data.error != null && error.data.error !== undefined
-          && error.data.error.sqlState == '12000'){
-      
-          $('#em-show-alert').html(alertDuplicate);
-      } else {
-          $('#em-show-alert').html(alertError);
-      }
-    };
-    
     $scope.makes = [ 'Chevrolet', 'Tata'];
     $scope.models = [ 'Tavera', 'Indica', 'Indigo'];
     
@@ -972,11 +1066,13 @@ angular.module('hnpApp').controller('EditCarController',
     var alertDelete = '<div class="alert alert-danger alert-error"><a href="#" class="close" data-dismiss="alert">&times;</a><strong>Error!</strong>Cannot Delete the Car.</div>';
     var alertSuccess = '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert">&times;</a><strong>Success!</strong> Car is edited successfully</div>';
     
-    //Initialize
-   
      
-    
+    //Event Functions
     $scope.ok = function (result) {
+        var dod = utilityService.formatDate($scope.car.flastServiceDate);
+        $scope.car.lastServiceDate = dod.replace(/-/g,'');
+        dod = utilityService.formatDate($scope.car.fnextServiceDate); 
+        $scope.car.nextServiceDate = dod.replace(/-/g,''); 
        myCar.upsert($scope.car, function(data, status){
           $('#em-show-alert').html(alertSuccess);
           alert('Car edited successfully!');
@@ -997,5 +1093,207 @@ angular.module('hnpApp').controller('EditCarController',
         });
     
     };
+  }]
+);
+
+angular.module('hnpApp').controller('NewCarController',
+  ['$scope', '$modalInstance', '$modal', 'user', 'utilityService', 'Car', function ($scope, $modalInstance, $modal, user, utilityService, myCar) {
+    
+    var car = {
+      make: '',
+      model: '',
+      version: '',
+      registrationNumber: '',
+      currentOdometer: 0,
+      lastServiceDate: 0,
+      nextServiceDate: 0,
+      status: 'On Road',
+      ownerName: '',
+      ownerAddress: '',
+      userId: user.id
+    };
+    
+    $scope.car = car;
+    $scope.car.flastServiceDate = new Date();
+    $scope.car.fnextServiceDate = new Date();
+    $scope.makes = [ 'Chevrolet', 'Tata'];
+    $scope.models = [ 'Tavera', 'Indica', 'Indigo'];
+    
+    var statuses = [
+      'Gaurage',
+      'On Road',
+      'Service'
+    ];  
+    $scope.statuses = statuses;
+    
+    //Variables
+    var alertError = '<div class="alert alert-danger alert-error"><a href="#" class="close" data-dismiss="alert">&times;</a><strong>Error!</strong>Internal Error while proceesing the booking.</div>';
+    var alertSuccess = '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert">&times;</a><strong>Success!</strong> Car is edited successfully</div>';
+    
+     
+    //Event Functions
+    $scope.ok = function (result) {
+        var dod = utilityService.formatDate($scope.car.flastServiceDate);
+        $scope.car.lastServiceDate = dod.replace(/-/g,'');
+        dod = utilityService.formatDate($scope.car.fnextServiceDate); 
+        $scope.car.nextServiceDate = dod.replace(/-/g,''); 
+       myCar.upsert($scope.car, function(data, status){
+          $('#em-show-alert').html(alertSuccess);
+          alert('Car created successfully!');
+          $scope.car.id = data.id;
+          $modalInstance.close($scope.car);
+       }, function (error){
+          $('#em-show-alert').html(alertError);
+       }); 
+    };
+    $scope.cancel = function () {
+        $modalInstance.dismiss('cancel');
+    };
+
+  }]
+);
+
+/*-----------------------------Driver Section------------------------------------*/
+angular.module('hnpApp').controller('EditDriverController',
+  ['$scope', '$modalInstance', '$modal', 'drivers', 'utilityService', 'Driver', function ($scope, $modalInstance, $modal, drivers, utilityService, myDriver) {
+    
+    $scope.driver = drivers.driver;
+    $scope.driver.fexpiryDate = utilityService.getDate($scope.driver.expiryDate);
+    
+    //Variables
+    var alertError = '<div class="alert alert-danger alert-error"><a href="#" class="close" data-dismiss="alert">&times;</a><strong>Error!</strong>Internal Error while proceesing the driver.</div>';
+    var alertDelete = '<div class="alert alert-danger alert-error"><a href="#" class="close" data-dismiss="alert">&times;</a><strong>Error!</strong>Cannot Delete the Driver.</div>';
+    var alertSuccess = '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert">&times;</a><strong>Success!</strong> Driver is edited successfully</div>';
+    
+     
+    //Event Functions
+    $scope.ok = function (result) {
+        var dod = utilityService.formatDate($scope.driver.fexpiryDate);
+        $scope.driver.expiryDate = dod.replace(/-/g,'');
+         
+       myDriver.upsert($scope.driver, function(data, status){
+          $('#em-show-alert').html(alertSuccess);
+          alert('Driver edited successfully!');
+          $modalInstance.close($scope.driver);
+       }, function (error){
+          $('#em-show-alert').html(alertError);
+       }); 
+    };
+    $scope.cancel = function () {
+        $modalInstance.dismiss('cancel');
+    };
+    $scope.deleteEvent = function () {
+        myDriver.deleteById({id: $scope.driver.id}, function(){
+           alert('Driver deleted successfully!');
+           $modalInstance.close(null);
+        }, function(data, status){
+          $('#em-show-alert').html(alertDelete);
+        });
+    
+    };
+  }]
+);
+
+angular.module('hnpApp').controller('NewDriverController',
+  ['$scope', '$modalInstance', '$modal', 'user', 'utilityService', 'Driver', 'Upload', function ($scope, $modalInstance, $modal, user, utilityService, myDriver, Upload) {
+    
+    var driver = {
+      firstName: '',
+      lastName: '',
+      cell: '',
+      emailId: '',
+      address: '',
+      licenseNumber: '',
+      userId: user.id
+    };
+    
+    //File Upload Function
+    $scope.uploadProfile = function (files) {
+      
+      if($scope.driver.firstName == ''){
+           $('#em-show-alert').html(alertFileUpload);
+      } else {
+        if (files && files.length) {
+            var file = files[0];
+            Upload.upload({
+                url: 'img/drivers/',
+                fields: {
+                    'driverName': $scope.driver.firstName
+                },
+                file: file
+            }).progress(function (evt) {
+                var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
+                if(progressPercentage == 100){
+                    $scope.log = 'progress: ' + progressPercentage + '% ' +
+                            evt.config.file.name + '\n' + $scope.log;
+                    $('#dr-img').attr('src', '/img/drivers/' + $scope.driver.firstName + '.jpg?' + (new Date()));
+                }
+                
+            }).success(function (data, status, headers, config) {
+                $scope.log = 'file ' + config.file.name + 'uploaded. Response: ' + JSON.stringify(data) + '\n' + $scope.log;
+                $scope.$apply();
+            });
+        } 
+      }
+    };
+    
+    $scope.uploadDl = function (files) {
+      
+      if($scope.driver.firstName == ''){
+           $('#em-show-alert').html(alertFileUpload);
+      } else {
+        if (files && files.length) {
+            var file = files[0];
+            Upload.upload({
+                url: 'img/drivers/dl/',
+                fields: {
+                    'driverName': $scope.driver.firstName
+                },
+                file: file
+            }).progress(function (evt) {
+                var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
+                if(progressPercentage == 100){
+                    $scope.log = 'progress: ' + progressPercentage + '% ' +
+                            evt.config.file.name + '\n' + $scope.log;
+                    
+                    $('#dr-dl').attr('src', '/img/drivers/' + $scope.driver.firstName + '-dl.jpg?' + (new Date()));
+                }
+                
+            }).success(function (data, status, headers, config) {
+                $scope.log = 'file ' + config.file.name + 'uploaded. Response: ' + JSON.stringify(data) + '\n' + $scope.log;
+                $scope.$apply();
+            });
+        } 
+      }
+    };
+    
+    
+    $scope.driver = driver;
+    $scope.driver.fexpiryDate = new Date();
+    
+    //Variables
+    var alertError = '<div class="alert alert-danger alert-error"><a href="#" class="close" data-dismiss="alert">&times;</a><strong>Error!</strong>Internal Error while proceesing the driver.</div>';
+    var alertSuccess = '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert">&times;</a><strong>Success!</strong> Driver is edited successfully</div>';
+    var alertFileUpload = '<div class="alert alert-warning"><a href="#" class="close" data-dismiss="alert">&times;</a><strong>Warning!</strong> Enter Driver name before uploading photo.</div>';
+    
+     
+    //Event Functions
+    $scope.ok = function (result) {
+        var dod = utilityService.formatDate($scope.driver.fexpiryDate);
+        $scope.driver.expiryDate = dod.replace(/-/g,'');
+         
+       myDriver.upsert($scope.driver, function(data, status){
+          $('#em-show-alert').html(alertSuccess);
+          alert('Driver created successfully!');
+          $scope.driver.id = data.id;
+          $modalInstance.close($scope.driver);
+       }, function (error){
+          $('#em-show-alert').html(alertError);
+       }); 
+    };
+    $scope.cancel = function () {
+        $modalInstance.dismiss('cancel');
+    };
+
   }]
 );

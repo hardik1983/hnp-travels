@@ -329,7 +329,7 @@
                 <div class="section-heading">     <h2>Cars</h2> 
                 </div>
               </div>
-              <button type="submit" class="btn btn-info pull-center" id="submit-add-car"><span class="glyphicon glyphicon-plus"></span> Add New Car</button>
+              <button type="submit" class="btn btn-info pull-center" id="submit-add-car" ng-click="showCarNewModal()"><span class="glyphicon glyphicon-plus"></span> Add New Car</button>
             </div>
           </div>
         </div>
@@ -397,7 +397,6 @@
                 <div class="col-md-7">
                     <div class="row"><div class="col-md-10"></div>
                       <div class="col-md-1 pull-right"><a href="#" class="" id="car-edit" ng-click="showCarEditModal(car.id)"><span class="glyphicon glyphicon-edit gi-2x"></span></a></div>
-                      <div class="col-md-1 pull-right"><a href="#" class="" id="car-delete"><span class="glyphicon glyphicon-remove gi-2x"></span></a></div>
                     </div>  
                     <div class="row"><div class="col-md-12">
                        <img ng-src="{{ 'img/cars/' + car.model + '.png'}}" alt="Cars" class="img-responsive center-block" id="car-image"/>
@@ -447,7 +446,7 @@
                   
                 </div>
               </div>
-              <button type="submit" class="btn btn-info pull-center" id="submit-add-driver"><span class="glyphicon glyphicon-plus"></span> Add New Driver</button>
+              <button type="submit" class="btn btn-info pull-center" id="submit-add-driver" ng-click="showDriverNewModal()"><span class="glyphicon glyphicon-plus"></span> Add New Driver</button>
             </div>
           </div>
         </div>
@@ -456,6 +455,13 @@
           <div class="hnpcontainer" ng-repeat="driver in drivers">
           <div class="hnpfields">
             <div class="row">
+                <div class="row">
+                <div class="col-md-12" >
+                      <div class="col-md-1 pull-right"><a href="#" class="" id="driver-edit" ng-click="showDriverEditModal(driver.id)"><span class="glyphicon glyphicon-edit gi-2x"></span></a></div>
+                      <br>
+                </div>
+                </div>
+                <br>
                 <div class="col-md-5 divider-vertical">
                     <div class="row">
                         <div class="col-md-6 text-left" id="key-bg">Driving Licence #:</div>
@@ -497,34 +503,30 @@
                 </div>
                 <div class="col-md-7">
                     <div class="row">
-                      <div class="col-md-8">
+                      <div class="col-md-5">
                         <div class="row" id="key-bg">
                             <div class="col-md-12">Driving License</div>
                         </div>
                         <div class="row">
                             <br>
-                            <div class="col-md-12"><img src="img/drivers/charles-dl.jpg" alt="Cars" class="img-responsive center-block" id="driver-lic-image"/></div>
+                            <div class="col-md-12"><img ng-src="{{'img/drivers/' + driver.firstName + '-dl.jpg'}}" alt="Cars" class="img-responsive center-block" id="driver-lic-image"/></div>
                         </div>
                        
                       </div>
-                      <div class="col-md-4">
-                       <img src="img/drivers/charles.jpg" alt="Cars" class="img-responsive center-block" id="driver-image"/>
+                      <div class="col-md-7">
+                       <img ng-src="{{'img/drivers/' + driver.firstName + '.jpg'}}" alt="Cars" class="img-responsive center-block" id="driver-image"/>
                       </div>
                     </div>
                     <div class="row">
-                      <div class="col-md-8">
+                      <div class="col-md-5">
                        
                       </div>
-                      <div class="col-md-4">
+                      <div class="col-md-7">
                          <div class="value-bg" class="text-center" id="driver-name">{{driver.firstName + ' ' + driver.lastName}} </div>
                       </div>
                     </div>
                     
-                    <div class="row"><div class="col-md-10"></div>
-                      <br>
-                      <div class="col-md-1 pull-right"><a href="#" class="" id="driver-edit"><span class="glyphicon glyphicon-edit gi-2x"></span></a></div>
-                      <div class="col-md-1 pull-right"><a href="#" class="" id="driver-delete"><span class="glyphicon glyphicon-remove gi-2x"></span></a></div>
-                    </div> 
+                    
                     
                 </div>
             </div>
@@ -688,6 +690,9 @@
 
     <!-- AngularJS JavaScript -->
     <script src="js/ng/app.js"></script>
+    <script src="js/ng/ng-file-upload.min.js"></script>
+    <script src="js/ng/ng-file-upload-shim.min.js"></script>
+    
     <!-- AngularJS Controllers JavaScript -->
     <script src="js/ng/controllers/cars-controller.js"></script>
     <script src="js/ng/controllers/drivers-controller.js"></script>

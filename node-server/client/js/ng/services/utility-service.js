@@ -10,9 +10,42 @@ angular.module('hnpApp').service('utilityService', function() {
     var monthStr = '';
     if (month < 10) {
       monthStr = '0' + month;
+    } else {
+      monthStr = '' + month;
+    }
+    
+    var day = dateToFormat.getDate();
+    var dayStr = '';
+    if (day < 10) {
+      dayStr = '0' + day;
+    } else{
+      dayStr = '' + day;
+    }  
+    
+    stringFormatted = dateToFormat.getFullYear() + '-' + monthStr + '-' + dayStr;
+    return stringFormatted;
+  };
+  
+  this.convertDateToStore = function(dateToFormat) {
+    var stringFormatted = '';             
+    
+    var month = dateToFormat.getMonth() + 1;
+    var monthStr = '';
+    if (month < 10) {
+      monthStr = '0' + month;
+    } else {
+      monthStr = '' + month;
+    }
+    
+    var day = dateToFormat.getDate();
+    var dayStr = '';
+    if (day < 10) {
+      dayStr = '0' + day;
+    } else{
+      dayStr = '' + day;
     } 
     
-    stringFormatted = dateToFormat.getFullYear() + '-' + monthStr + '-' + dateToFormat.getDate();
+    stringFormatted = dateToFormat.getFullYear() + '' + monthStr + '' + dayStr;
     
     return stringFormatted;
   };

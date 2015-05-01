@@ -1,0 +1,112 @@
+     <!-- Booking Edit Modal -->
+<!--div id="fullCalModal" class="modal fade" ng-controller="upcomingBookingController" >
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" -->
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" ng-click="cancel()"><span aria-hidden="true">&times;</span></button>
+                <h4 id="modalTitle" class="modal-title">{{driver.firstName + ' ' + driver.lastName}}</h4>
+            </div>
+            <div id="modalBody" class="modal-body" ng-controller="upcomingBookingController">
+                  <div class="hnpcontainer-md">
+
+                          <div class="hnpfields-md">
+                              <div class="row">
+                              <div class="col-md-7" >
+                                      <div class="row">
+                                           <div class="col-md-8" id="key"><div class=" text-left pull-bottom"><h3 id="upcmg-book-dest">Driver ID: {{driver.id}}</h3></div></div>
+                                           
+                                      </div>
+                                      <div class="row">
+                                            <hr>
+                                            <div class="col-md-6">
+                                              <div class="form-group"> 
+                                                <label class="hnp-label" for="name">                                First Name:
+                                                </label> 
+                                                <input type="text" class="form-control value" id="firstName" placeholder="First Name" required="required" ng-model="driver.firstName"/>
+                                              </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                              <div class="form-group"> 
+                                                <label class="hnp-label" for="name">                                Last Name:
+                                                </label> 
+                                                <input type="text" class="form-control value" id="lastName" placeholder="Last Name" required="required" ng-model="driver.lastName"/>
+                                              </div>
+                                            </div>
+                                            <div class="col-md-12">
+                                              <div class="form-group  text-center">
+                                                <label class="hnp-label" for="name">                                Address:
+                                                </label> 
+                                                <textarea type="text" class="form-control value" id="ec-owner-add" placeholder="Address" rows="2" ng-model="driver.address" />
+                                              </div>
+                                            </div>
+                                            <div class="col-md-12">
+                                              <div class="form-group  text-center">
+                                                <label class="hnp-label" for="name">                                Email ID:
+                                                </label> 
+                                                <input type="text" class="form-control value" id="email" placeholder="yourid@domain.com" required="required" ng-model="driver.emailId"/>
+                                              </div>
+                                            </div>
+                                            <div class="col-md-12">
+                                              <div class="form-group"> 
+                                                <label class="hnp-label" for="mobile">                                Mobile:
+                                                </label> 
+                                                <input type="text" class="form-control value" id="mobile" placeholder="11231231234" required="required" ng-model="driver.cell" />
+                                              </div>
+                                            </div>
+                                      </div>
+                                      <div class="row">
+                                            <hr>
+                                            <div class="row">
+                                              <div class="col-md-6 key" id="">License #: <input type="text" class="form-control value" id="dr-lic" placeholder="XX/##/XX/####/XX" required="required" ng-model="driver.licenseNumber" /> </div>
+                                              <div class="col-md-6 key" id="">Expiry Date: <input type="date" class="form-control value" id="dr-exp" placeholder="" ng-model="driver.fexpiryDate" /> </div>
+                                            </div>
+                                      </div>
+                              </div>
+                              <div class="col-md-5">
+                                      <br>
+                                      <div class="row">
+                                              <div class="row">
+                                                  <div class="col-md-12 key text-center">Profile Picture</div>
+                                              </div>
+                                              <div class="row" >
+                                                  <div class="col-md-12 text-center">
+                                                         <div class="col-md-2"></div>
+                                                         <div class="col-md-10">   
+                                                            <img ng-src="{{'img/drivers/' + driver.firstName + '.jpg'}}" alt="Share" class="img-responsive" /> <br/> 
+                                                          </div>
+                                                  </div>
+                                              </div>
+                                      </div>
+                                            <div class="row">
+                                              <div class="row">
+                                                  <div class="col-md-12 key text-center">License Picture</div>
+                                              </div>
+                                              <div class="row" >
+                                                  <div class="col-md-12 text-center">
+                                                         <div class="col-md-2"></div>
+                                                         <div class="col-md-10">   
+                                                            <img ng-src="{{'img/drivers/' + driver.firstName + '-dl.jpg'}}" alt="Share" class="img-responsive" /> <br/> 
+                                                          </div>
+                                                  </div>
+                                              </div>
+                                      </div>
+
+                              </div>
+                            </div>
+                          </div>
+                          <div class="row">
+                                      <br>
+                                          <div class="col-md-12 key text-center" id="em-show-alert">
+                                              
+                                          </div>
+                          </div>
+                      </div>
+                  </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="cancel()">Cancel</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal" ng-click="deleteEvent()">Delete</button>
+                <button class="btn btn-success"><a id="eventUrl" class="value-md" target="_blank" ng-click="ok()">Update</a></button>
+            </div>
+        <!-- /div>
+    </div>
+</div -->

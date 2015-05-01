@@ -1,0 +1,187 @@
+ENBKDY4
+
+================================================================================
+
+
+create table hnp_users
+(
+  hnp_user_id MEDIUMINT NOT NULL AUTO_INCREMENT,
+  f_name varchar(50),
+  l_name varchar(50),
+  password varchar(20),
+  email varchar(100) NOT NULL,
+  PRIMARY KEY (hnp_user_id)
+);
+
+create table hnp_drivers
+(
+  hnp_driver_id MEDIUMINT NOT NULL AUTO_INCREMENT,
+  f_name varchar(50),
+  l_name varchar(50),
+  password varchar(20),
+  email varchar(100),
+  address varchar(100),
+  cell varchar(10),
+  license_nbr varchar(50),
+  hnp_user_id MEDIUMINT,
+  FOREIGN KEY (hnp_user_id) REFERENCES hnp_users(hnp_user_id),
+  PRIMARY KEY (hnp_driver_id) 
+);
+
+alter table sonar.hnp_drivers ADD column expiry_date varchar(10);
+
+create table hnp_customers
+(
+  hnp_customer_id MEDIUMINT NOT NULL AUTO_INCREMENT,
+  f_name varchar(50),
+  l_name varchar(50),
+  password varchar(20),
+  email varchar(100),
+  address varchar(100),
+  cell varchar(10),
+  hnp_user_id MEDIUMINT,
+  FOREIGN KEY (hnp_user_id) REFERENCES hnp_users(hnp_user_id),
+  PRIMARY KEY (hnp_customer_id) 
+);
+
+create table hnp_cars
+(
+  hnp_car_id MEDIUMINT NOT NULL AUTO_INCREMENT,
+  hnp_user_id MEDIUMINT,
+  make varchar(20),
+  model varchar(20),
+  version varchar(20),
+  registration_nbr varchar(20),
+  current_odo int,
+  last_service date,
+  next_service date,
+  last_loc varchar(50),
+  FOREIGN KEY (hnp_user_id) REFERENCES hnp_users(hnp_user_id),
+  PRIMARY KEY (hnp_car_id) 
+);
+
+alter table sonar.hnp_cars ADD column owner_name varchar(50);
+alter table sonar.hnp_cars ADD column owner_address varchar(100);
+alter table sonar.hnp_cars ADD column status varchar(10);
+
+
+create table sonar.hnp_events
+(
+  hnp_event_id INT NOT NULL AUTO_INCREMENT,
+  hnp_user_id MEDIUMINT,
+  hnp_car_id MEDIUMINT,
+  hnp_driver_id MEDIUMINT,
+  hnp_customer_id MEDIUMINT,
+  pickup_date varchar(10),
+  pickup_time varchar(5),
+  pickup_address varchar(100),
+  destination varchar(100),
+  start_odo INT,
+  end_odo INT,
+  rate NUMERIC,
+  kms MEDIUMINT,
+  status varchar(10),
+  destination1_time varchar(5),
+  destination2_time varchar(5),
+  dropoff_date varchar(10),
+  dropoff_time varchar(5),
+  last_known_loc varchar(50),
+  FOREIGN KEY (hnp_user_id) REFERENCES hnp_users(hnp_user_id),
+  FOREIGN KEY (hnp_car_id) REFERENCES hnp_cars(hnp_car_id),
+  PRIMARY KEY (hnp_event_id, hnp_car_id, pickup_date, dropoff_date) 
+);
+
+drop table sonar.hnp_events;
+
+
+
+select  e.hnp_event_id as id,  
+        e.hnp_user_id as userId,   
+        e.hnp_car_id as carId,   
+        e.hnp_driver_id as driverId,   
+        e.hnp_customer_id as customerId,   
+        e.pickup_date as eventDate,   
+        e.pickup_time as eventTime,   
+        e.pickup_address as pickupAddress,   
+        e.destination as destination,   
+        e.start_odo as startOdometer,   
+        e.end_odo as endOdometer,   
+        e.rate as rate,   
+        e.kms as kilometers, 
+        e.status as status, 
+        e.destination1_time as destination1Time, 
+        e.destination2_time as destination2Time, 
+        e.dropoff_time as dropOffTime, 
+        e.last_known_loc as lastKnownLocation, 
+        e.dropoff_date as dropOffDate,
+        c.f_name as customerFirstName,
+        c.l_name as customerLastName,
+        c.cell as customerMobile,
+        c.email as customerEmail     
+from   sonar.hnp_events as e LEFT JOIN sonar.hnp_customers as c
+ON     e.hnp_customer_id = c.hnp_customer_id
+
+
+select  e.hnp_event_id as id,  
+        c.f_name as customerFirstName,
+        c.l_name as customerLastName,
+        c.cell as customerMobile,
+        c.email as customerEmail     
+from   sonar.hnp_events as e LEFT JOIN sonar.hnp_customers as c
+ON     e.hnp_customer_id = c.hnp_customer_id
+
+
+
+CREATE TRIGGER check_availability BEFORE INSERT ON event
+FOR EACH ROW
+BEGIN
+  DECLARE conflicts INT;
+  SET @conflicts = (SELECT count(*) FROM event 
+  WHERE carId = NEW.carId 
+    AND (
+          (NEW.eventDate >= eventDate 
+            AND NEW.eventDate <= dropOffDate) 
+          OR (NEW.dropOffDate >= eventDate 
+            AND NEW.dropOffDate <= dropOffDate) 
+          OR ( eventDate >= NEW.eventDate 
+            AND eventDate <= NEW.dropOffDate) 
+          OR ( dropOffDate >= NEW.eventDate 
+            AND dropOffDate <= NEW.dropOffDate)
+        )
+  );
+  
+  IF (@conflicts > 0) THEN
+     SIGNAL SQLSTATE '12000'
+        SET MESSAGE_TEXT = "Car Already Booked between these dates. Please select different date or car."; 
+  END IF;
+END;
+
+CREATE TRIGGER check_availability_update BEFORE UPDATE ON event
+FOR EACH ROW
+BEGIN
+  DECLARE conflicts INT;
+  SET @conflicts = (SELECT count(*) FROM event 
+  WHERE carId = NEW.carId 
+    AND (
+          (NEW.eventDate >= eventDate 
+            AND NEW.eventDate <= dropOffDate) 
+          OR (NEW.dropOffDate >= eventDate 
+            AND NEW.dropOffDate <= dropOffDate) 
+          OR ( eventDate >= NEW.eventDate 
+            AND eventDate <= NEW.dropOffDate) 
+          OR ( dropOffDate >= NEW.eventDate 
+            AND dropOffDate <= NEW.dropOffDate)
+        )
+    AND id != NEW.id
+  );
+  
+  IF (@conflicts > 0) THEN
+     SIGNAL SQLSTATE '12000'
+        SET MESSAGE_TEXT = "Car Already Booked between these dates. Please select different date or car."; 
+  END IF;
+END;
+
+
+
+
+      
