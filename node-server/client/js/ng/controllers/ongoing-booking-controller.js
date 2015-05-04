@@ -361,14 +361,88 @@ angular.module('hnpApp').controller('ongoingBookingController',
         
         var modalInstance = $modal.open($scope.opts);
         
+        var updateCarAndDriver = function(bkg){
+          if(bkg.carId != bkg.oldCarId){
+            //Add Event into new Car
+            if(drivers[bkg.driverId].events !== undefined){
+              cars[bkg.carId].events.push(bkg);
+            } else {
+              var events = [];
+              events.push(bkg);
+              cars[bkg.carId].events = events;
+            }
+          
+            //Remove Event from the old Car
+            var carEvents =  cars[bkg.oldCarId].events
+            for(var i=0; i < carEvents.length; i++){
+              if(carEvents[i].id == bkg.id){
+                  carEvents.splice(i, 1);
+                  break;
+              }
+            }
+            //Update Bookings with new Car
+            bkg.car = cars[bkg.carId];
+          }
+          
+          //Driver - check if changed
+          if(bkg.driverId != bkg.oldDriverId){
+              //Add Event into new Driver
+              if(drivers[bkg.driverId].events !== undefined){
+                drivers[bkg.driverId].events.push(bkg);
+              } else {
+                var events = [];
+                events.push(bkg);
+                drivers[bkg.driverId].events = events;
+              }
+              
+              //Remove Event from old Drvier
+              if(bkg.oldDriverId != null && bkg.oldDriverId != ''){
+                var driverEvents = drivers[bkg.oldDriverId].events;
+                for(var i=0; i < driverEvents.length; i++){
+                  if(driverEvents[i].id == bkg.id){
+                      driverEvents.splice(i, 1);
+                      break;
+                  }
+                }
+              }
+              //Update Bookings with new Driver
+              bkg.driver = drivers[bkg.driverId];
+              
+          }
+        };
+        
+        var removeBookingFromCarDriver = function(id){
+            var carId = bookings[id].carId;
+            var carEvents =  cars[carId].events
+            for(var i=0; i < carEvents.length; i++){
+              if(carEvents[i].id == id){
+                  carEvents.splice(i, 1);
+                  break;
+              }
+            }
+            
+            var driverId = bookings[id].driverId;
+            if(driverId != null && driverId != ''){
+              var driverEvents =  drivers[driverId].events
+              for(var i=0; i < driverEvents.length; i++){
+                if(driverEvents[i].id == id){
+                    driverEvents.splice(i, 1);
+                    break;
+                }
+              }
+            }
+        }
+        
         modalInstance.result.then(function(result){
             if(result != null){
+                updateCarAndDriver(result);
                 bookings[result.id] = result;
                 event.title = bookings[result.id].destination;
                 event.start = utilityService.formatDateString(bookings[event.id].eventDate);
                 event.end = utilityService.formatDateStringEnd(bookings[event.id].dropOffDate);
                 $('#calendar').fullCalendar('updateEvent', event);
             } else {
+                removeBookingFromCarDriver(event.id);
                 delete bookings[event.id];
                 for(var i=0; i < eventList.length ; i++){
                   if (eventList[i].id == event.id) {
@@ -638,7 +712,6 @@ angular.module('hnpApp').controller('EditBookingController',
       }
       timeToString();
     };
-    
     $scope.changeKms = function(){
         var startKm = 0;
         var endKm = 0;
@@ -679,6 +752,9 @@ angular.module('hnpApp').controller('EditBookingController',
     $scope.booking.dropOffTime = convertTimeToString($scope.booking.dropOffTime);
     $scope.message = '';
     var oldMobile = '';
+    $scope.booking.oldCarId = $scope.booking.carId;
+    $scope.booking.oldDriverId = $scope.booking.driverId;
+    
     
     if($scope.customer != null && $scope.customer != undefined){
       oldMobile = $scope.customer.cell;
