@@ -12,6 +12,11 @@ angular.module('hnpApp').controller('ongoingBookingController',
     var bookings = {};
     //var customers = {};
     var eventList = [];
+        
+    var maps = {};
+    var latlng = {};
+    var dirDisplays = {};
+    var trackingCars = {};
      
     var convertTime = function(input){
       var nullTime = '--:--';
@@ -58,7 +63,66 @@ angular.module('hnpApp').controller('ongoingBookingController',
        } else {
           return 'Scheduled';
        }
-    }  
+    };
+
+    var prepareMap = function(index){
+       if(maps[index] !== null && maps[index] !== undefined){
+        
+       } else {
+          var res;          
+          if(bookings[index].lastKnownLocation != 'Unknown'){
+            res = bookings[index].lastKnownLocation.split(',');
+          } else{
+            res = [];
+            res[0] = '42.986058';
+            res[1] = '-81.242596';
+            //latlng = bookings[index].pickupAddress;
+          } 
+          latlng[index] = new google.maps.LatLng(res[0], res[1]);
+          var options = {
+            zoom: 15,
+            center: latlng[index],
+            mapTypeId: google.maps.MapTypeId.ROADMAP,
+            navigationControl: true,
+            mapTypeControl: false,
+            scrollwheel: false,
+            disableDoubleClickZoom: true
+          };
+          maps[index] = new google.maps.Map(document.getElementById('google_map' + index), options);
+          dirDisplays[index] = new google.maps.DirectionsRenderer();
+          dirDisplays[index].setMap(maps[index]);
+          trackingCars[bookings[index].carId] = index;
+          // add Marker
+          var marker1 = new google.maps.Marker({ position: latlng[index], map: maps[index] });
+          // add listener for a click on the pin
+          google.maps.event.addListener(marker1, 'click', function() { 
+            infowindow.open(maps[index], marker1);
+          });
+          // add information window
+          var infowindow = new google.maps.InfoWindow({
+            content:  '<div class="info"><strong>' + bookings[index].carId.registrationNumber + '</strong><br><br>Last known location at<br></div>'
+          });
+          
+       }
+    };  
+    
+    var updateTracker = function(cordinates){
+      console.log('Received Pulse: ' + cordinates);
+      //Check is update is for this user
+      if(userId == cordinates.userId){
+         //Check if this car is being tracked
+         var bkgId = trackingCars[cordinates.carId];
+         if(bkgId != null && bkgId > 0){
+            var res = cordinates.lastKnownLocation.split(',');
+            latlng[bkgId] = new google.maps.LatLng(res[0], res[1]);
+            var trckMarker = new google.maps.Marker({ position: latlng[bkgId], map: maps[bkgId] });
+         } 
+      }
+    };
+    
+    //Activate the Car Tracking/Monitoring System
+    var source = new EventSource('/track/cars');
+    source.addEventListener('message', updateTracker, false);
     
     
     $scope.currentDate = currentDate;
@@ -210,51 +274,9 @@ angular.module('hnpApp').controller('ongoingBookingController',
     
     $scope.ddClick = function(index){
       $('#ongng-dropdown' + index).toggle();
-      var res;
-      var latlng;
-      if(bookings[index].lastKnownLocation != 'Unknown'){
-        res = bookings[index].lastKnownLocation.split(',');
-        
-      }
-      else{
-        res = [];
-        res[0] = '42.986058';
-        res[1] = '-81.242596';
-        //latlng = bookings[index].pickupAddress;
-      } 
-      latlng = new google.maps.LatLng(res[0], res[1]);
-      
-      // prepare the map properties
-      var options = {
-            zoom: 15,
-            center: latlng,
-            mapTypeId: google.maps.MapTypeId.ROADMAP,
-            navigationControl: true,
-            mapTypeControl: false,
-            scrollwheel: false,
-            disableDoubleClickZoom: true
-      };
-
-      // initialize the map object
-      var map = new google.maps.Map(document.getElementById('google_map' + index), options);
-      var directionsDisplay = new google.maps.DirectionsRenderer();
-      directionsDisplay.setMap(map);
-      
-      // add Marker
-      var marker1 = new google.maps.Marker({
-        position: latlng, map: map
-      });
-      // add listener for a click on the pin
-      google.maps.event.addListener(marker1, 'click', function() {
-        infowindow.open(map, marker1);
-      });
-      // add information window
-      var infowindow = new google.maps.InfoWindow({
-        content:  '<div class="info"><strong>' + bookings[index].carId.registrationNumber + '</strong><br><br>Last known location at<br></div>'
-      });
-      
+      prepareMap(index);
       var currEstimated = $('#ongng-trckr-estimated' + index).text(); 
-      calculateEstimatedTime(bookings[index].lastKnownLocation, bookings[index].destination, index, directionsDisplay);
+      calculateEstimatedTime(bookings[index].lastKnownLocation, bookings[index].destination, index, dirDisplays[index]);
       findLocationName(bookings[index].lastKnownLocation, index);
       
     };
