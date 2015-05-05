@@ -106,16 +106,33 @@ angular.module('hnpApp').controller('ongoingBookingController',
        }
     };  
     
-    var updateTracker = function(cordinates){
-      console.log('Received Pulse: ' + cordinates);
+    var updateTracker = function(msg){
+      var cordinates = JSON.parse(msg.data);
       //Check is update is for this user
       if(userId == cordinates.userId){
          //Check if this car is being tracked
          var bkgId = trackingCars[cordinates.carId];
          if(bkgId != null && bkgId > 0){
+            // Update Session Data
+            bookings[bkgId].lastKnownLocation = cordinates.lastKnownLocation;
+            
+            //Add the marker
             var res = cordinates.lastKnownLocation.split(',');
             latlng[bkgId] = new google.maps.LatLng(res[0], res[1]);
             var trckMarker = new google.maps.Marker({ position: latlng[bkgId], map: maps[bkgId] });
+            var infowindow = new google.maps.InfoWindow({
+               content:  '<div class="info"><strong>' + cars[cordinates.carId].registrationNumber + '</strong><br>@' + cordinates.time + '</div>'
+            });
+            google.maps.event.addListener(trckMarker, 'click', function() { 
+              infowindow.open(maps[bkgId], trckMarker);
+            });
+            
+            // Update Calculate Time and Direction
+            var currEstimated = $('#ongng-trckr-estimated' + bkgId).text(); 
+            calculateEstimatedTime(bookings[bkgId].lastKnownLocation, bookings[bkgId].destination, bkgId, dirDisplays[bkgId]);
+            findLocationName(bookings[bkgId].lastKnownLocation, bkgId);
+            
+            
          } 
       }
     };
@@ -171,9 +188,9 @@ angular.module('hnpApp').controller('ongoingBookingController',
               eventData[i].dropOffTime = utilityService.formatTime(eventData[i].dropOffTime);     
               
               //Calculate elapsed time since pickup
-              if(eventData[i].eventTime != '--:--'){
+              /*if(eventData[i].eventTime != '--:--'){
                 eventData[i].elapsedTime = utilityService.getElapsedTime(eventData[i].eventDate, eventData[i].eventTime); 
-              }
+              } */
               
               //Populate Hash Map with key = booking.id
               bookings[eventData[i].id] = eventData[i];
@@ -275,6 +292,9 @@ angular.module('hnpApp').controller('ongoingBookingController',
     $scope.ddClick = function(index){
       $('#ongng-dropdown' + index).toggle();
       prepareMap(index);
+      if(bookings[index].totalTime == undefined){
+         calculateTotalTime(bookings[index].pickupAddress, bookings[index].destination, index);
+      }
       var currEstimated = $('#ongng-trckr-estimated' + index).text(); 
       calculateEstimatedTime(bookings[index].lastKnownLocation, bookings[index].destination, index, dirDisplays[index]);
       findLocationName(bookings[index].lastKnownLocation, index);
@@ -317,6 +337,26 @@ angular.module('hnpApp').controller('ongoingBookingController',
               if(results.duration !== null && results.duration !== undefined ){
                   $scope.bookings[bookingId].estimatedTime = results.duration.text;
                   $('#ongng-trckr-estimated' + bookingId).text(results.duration.text + ' Estimated.');
+                  if($scope.bookings[bookingId].totalTime !== undefined){
+                      var estVal = results.duration.value;
+                      var totalTime = $scope.bookings[bookingId].totalTime;
+                      var estpc = ((totalTime -estVal)/totalTime) * 100;
+                      var widthPc = Math.floor(estpc);
+                      var leftPc = 100 - widthPc
+                      $('#left-prg').attr('style', 'width:' + widthPc + '%');
+                      $('#right-prg').attr('style', 'width:' + leftPc + '%');
+                      if(widthPc < 10){
+                          $('#left-prg-top').attr('style', 'width:10%');
+                      } else{
+                        $('#left-prg-top').attr('style', 'width:' + widthPc + '%');
+                      }
+                      
+                      var elapMins = (totalTime - estVal)/60;
+                      elapMins = Math.floor(elapMins);
+                      $scope.bookings[bookingId].elapsedTime = elapMins + " mins";
+                      $('#ongng-trckr-elapsed').text(elapMins + " mins Driven.");
+                      
+                  }
               }
             }
             else {
@@ -325,6 +365,33 @@ angular.module('hnpApp').controller('ongoingBookingController',
         }
         
         
+    };
+    
+    var calculateTotalTime = function (origin, destination, bookingId){
+        var origin = origin;
+        destination = destination;
+        
+        var service = new google.maps.DistanceMatrixService();
+        var request = {
+            origins: [origin],
+            destinations: [destination],
+            travelMode: google.maps.TravelMode.DRIVING,
+            unitSystem: google.maps.UnitSystem.METRIC,
+            avoidHighways: false,
+            avoidTolls: false
+          };
+        service.getDistanceMatrix(request, callback);
+        
+        function callback(response, status) {
+            if (status == google.maps.DistanceMatrixStatus.OK) {
+              var results = response.rows[0].elements[0];
+              if(results.duration !== null && results.duration !== undefined ){
+                  $scope.bookings[bookingId].totalTime = results.duration.text;
+                  bookings[bookingId].totalTime = results.duration.value; 
+                  console.log($scope.bookings[bookingId].totalTime);
+              }
+            }
+        }
     };
     
     var findLocationName = function (latlong, index){

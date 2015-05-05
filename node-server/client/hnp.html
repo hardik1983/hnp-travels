@@ -234,23 +234,27 @@
               <div class="row">
                 <div class="col-md-7">
                 <div class="row">
-                  <div class="col-md-5">
+                  <div id="left-prg-top" style="width:70%">
                     <img ng-src="{{ 'img/icons/' + booking.car.id + '.png'}}" alt="Share" class="img-responsive pull-right" id="ongng-trckr-car" />
                   </div>
-                  <div class="col-md-7">
+                  <div id="right-prg-top" >
                   </div>
                 </div>
                 <div class="row">
-                  <div class="col-md-5">
-                    <hr class="solid">
-                  </div>
-                  <div class="col-md-7">
-                    <hr class="dotted">
+                  <div class="col-md-12">
+                    <div class="progress">
+                      <div id="left-prg" class="progress-bar progress-bar-success" role="progressbar" style="width:70%">
+                        Driven
+                      </div>
+                      <div id="right-prg" class="progress-bar progress-bar-danger" role="progressbar" style="width:30%">
+                        Remaining
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <div class="row">
                   <div class="col-md-5 value" id="ongng-trckr-elapsed" >
-                    {{booking.elapsedTime}} Driven
+                    {{booking.elapsedTime}} Driven.
                   </div>
                   <div class="col-md-7">
                     <div class="span12 text-right value" id="{{'ongng-trckr-estimated' + booking.id}}">{{booking.estimatedTime}} Estimated.</div>

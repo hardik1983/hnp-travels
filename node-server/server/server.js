@@ -43,11 +43,11 @@ var updateOpenConnections = function(update){
         console.log('sending response');
         var d = new Date();
         var msg = JSON.stringify(update)
-        //resp.write('event: ' + 'CarMonitor \n');
-        //var wrote= resp.write('id: ' + d.getMilliseconds() + '\n');
-        //console.log(wrote);
         resp.write('data:' + msg + '\n\n');
+        resp.send();
+        resp.end();
     });
+    openConnections = [];
 };
 
 deleteFolderRecursive(tmpPath);
@@ -87,17 +87,17 @@ boot(app, __dirname, function(err) {
       console.log('request received to track the car.');
       req.socket.setTimeout(Infinity);
       res.writeHead(200, {
-        'Content-Type': 'text/event-stream; charset=UTF-8',
+        'Content-Type': 'text/event-stream',
         'Access-Control-Allow-Origin': '*', 
         'Cache-Control': 'no-cache',
-        'x-content-type-options': 'nosniff',
-        'Connection': 'keep-alive'
+        'Connection': 'keep-alive',
+        'Transfer-Encoding': 'chunked'
       });
       openConnections.push(res);
       
       res.write('\n\n');
-      res.write('event: message \n');
-      res.write('data: 1234 \n\n');
+      //res.write('data: 1234');
+      //res.write('\n\n');
       
       req.on("close", function() {
         console.log('request received to stop tracking the car.')
