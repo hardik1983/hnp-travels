@@ -46,6 +46,7 @@ var updateOpenConnections = function(update){
         resp.write('data:' + msg + '\n\n');
         resp.send();
         resp.end();
+        //resp.set("Connection", "close");
     });
     openConnections = [];
 };
