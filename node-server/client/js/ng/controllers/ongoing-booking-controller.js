@@ -1,5 +1,5 @@
 angular.module('hnpApp').controller('ongoingBookingController',
-  ['$scope', '$http', '$modal', 'utilityService', 'Event', 'User', 'LoopBackAuth', function ($scope, $http, $modal, utilityService, myEvent, myUser, LoopBackAuth) {
+  ['$scope', '$http', '$modal', '$timeout', 'utilityService', 'Event', 'User', 'LoopBackAuth', function ($scope, $http, $modal, $timeout, utilityService, myEvent, myUser, LoopBackAuth) {
     'use strict';
     var allBookings = [];
     var userId = LoopBackAuth.currentUserId;
@@ -70,7 +70,7 @@ angular.module('hnpApp').controller('ongoingBookingController',
         
        } else {
           var res;          
-          if(bookings[index].lastKnownLocation != 'Unknown'){
+          if(bookings[index].lastKnownLocation != null && bookings[index].lastKnownLocation != 'Unknown'){
             res = bookings[index].lastKnownLocation.split(',');
           } else{
             res = [];
@@ -296,6 +296,7 @@ angular.module('hnpApp').controller('ongoingBookingController',
          calculateTotalTime(bookings[index].pickupAddress, bookings[index].destination, index);
       }
       var currEstimated = $('#ongng-trckr-estimated' + index).text(); 
+      //$timeout(calculateEstimatedTime(bookings[index].lastKnownLocation, bookings[index].destination, index, dirDisplays[index]), 1000);
       calculateEstimatedTime(bookings[index].lastKnownLocation, bookings[index].destination, index, dirDisplays[index]);
       findLocationName(bookings[index].lastKnownLocation, index);
       
@@ -343,18 +344,18 @@ angular.module('hnpApp').controller('ongoingBookingController',
                       var estpc = ((totalTime -estVal)/totalTime) * 100;
                       var widthPc = Math.floor(estpc);
                       var leftPc = 100 - widthPc
-                      $('#left-prg').attr('style', 'width:' + widthPc + '%');
-                      $('#right-prg').attr('style', 'width:' + leftPc + '%');
+                      $('#left-prg-' + bookingId).attr('style', 'width:' + widthPc + '%');
+                      $('#right-prg-' + bookingId).attr('style', 'width:' + leftPc + '%');
                       if(widthPc < 10){
-                          $('#left-prg-top').attr('style', 'width:10%');
+                          $('#left-prg-top-' + bookingId).attr('style', 'width:10%');
                       } else{
-                        $('#left-prg-top').attr('style', 'width:' + widthPc + '%');
+                        $('#left-prg-top-' + bookingId).attr('style', 'width:' + widthPc + '%');
                       }
                       
                       var elapMins = (totalTime - estVal)/60;
                       elapMins = Math.floor(elapMins);
                       $scope.bookings[bookingId].elapsedTime = elapMins + " mins";
-                      $('#ongng-trckr-elapsed').text(elapMins + " mins Driven.");
+                      $('#ongng-trckr-elapsed-' + bookingId).text(elapMins + " mins Driven.");
                       
                   }
               }
@@ -388,7 +389,6 @@ angular.module('hnpApp').controller('ongoingBookingController',
               if(results.duration !== null && results.duration !== undefined ){
                   $scope.bookings[bookingId].totalTime = results.duration.text;
                   bookings[bookingId].totalTime = results.duration.value; 
-                  console.log($scope.bookings[bookingId].totalTime);
               }
             }
         }
@@ -752,7 +752,7 @@ angular.module('hnpApp').controller('ongoingBookingController',
 
 /*-----------------------------Booking Section--------------------------------*/
 angular.module('hnpApp').controller('EditBookingController',
-  ['$scope', '$modalInstance', '$modal', 'bookings', 'cars', 'drivers', 'utilityService', 'Event', 'Customer', function ($scope, $modalInstance, $modal, bookings, cars, drivers, utilityService, myEvent, myCust) {
+  ['$scope', '$modalInstance', '$modal', '$timeout', 'bookings', 'cars', 'drivers', 'utilityService', 'Event', 'Customer', function ($scope, $modalInstance, $modal, $timeout, bookings, cars, drivers, utilityService, myEvent, myCust) {
      
     //Functions
     var convertTimeToString = function(input){
@@ -848,6 +848,27 @@ angular.module('hnpApp').controller('EditBookingController',
     if($scope.customer != null && $scope.customer != undefined){
       oldMobile = $scope.customer.cell;
     }
+    
+    $modalInstance.opened.then(
+       $timeout(function(){
+        var pickupAuto = new google.maps.places.Autocomplete(
+            (document.getElementById('em-pickup-address')),
+            { types: ['geocode'] }
+        );
+        var destinationAuto = new google.maps.places.Autocomplete(
+            (document.getElementById('em-destination')),
+            { types: ['geocode'] }
+        );
+        google.maps.event.addListener(pickupAuto, 'place_changed', function() {
+            $scope.booking.pickupAddress = pickupAuto.getPlace().formatted_address;
+            $scope.booking.lastKnownLocation = pickupAuto.getPlace().geometry.location.lat() + ',' + pickupAuto.getPlace().geometry.location.lng();
+        });
+        google.maps.event.addListener(destinationAuto, 'place_changed', function() {
+            $scope.booking.destination = destinationAuto.getPlace().formatted_address;
+        });
+        $('.pac-container').css('z-index', 9999);
+      }, 1000)
+    );
     
     //Google Maps Stuff
     if($scope.booking.lastKnownLocation != '' && $scope.booking.lastKnownLocation != 'Unknown' && $scope.booking.lastKnownLocation !== null){
@@ -971,7 +992,7 @@ angular.module('hnpApp').controller('EditBookingController',
         }    
     };
     $scope.cancel = function () {
-        $modalInstance.dismiss('cancel');
+      $modalInstance.dismiss('cancel');
     };
     $scope.deleteEvent = function () {
         myEvent.deleteById({id: $scope.booking.id}, function(){
@@ -987,7 +1008,7 @@ angular.module('hnpApp').controller('EditBookingController',
 
 
 angular.module('hnpApp').controller('NewBookingController',
-  ['$scope', '$modalInstance', '$modal', 'cars', 'drivers', 'utilityService', 'Event', 'User', 'Customer', function ($scope, $modalInstance, $modal, cars, drivers, utilityService, myEvent, myUser, myCust) {
+  ['$scope', '$modalInstance', '$modal', '$timeout', 'cars', 'drivers', 'utilityService', 'Event', 'User', 'Customer', function ($scope, $modalInstance, $modal, $timeout, cars, drivers, utilityService, myEvent, myUser, myCust) {
     
     //Functions
     var convertTimeToString = function(input){
@@ -1075,6 +1096,28 @@ angular.module('hnpApp').controller('NewBookingController',
     $scope.cars = cars.cars;
     $scope.drivers = drivers.drivers;
     
+    $modalInstance.opened.then(
+       $timeout(function(){
+        var pickupAuto = new google.maps.places.Autocomplete(
+            (document.getElementById('em-pickup-address')),
+            { types: ['geocode'] }
+        );
+        var destinationAuto = new google.maps.places.Autocomplete(
+            (document.getElementById('em-destination')),
+            { types: ['geocode'] }
+        );
+        google.maps.event.addListener(pickupAuto, 'place_changed', function() {
+            $scope.booking.pickupAddress = pickupAuto.getPlace().formatted_address;
+            $scope.booking.lastKnownLocation = pickupAuto.getPlace().geometry.location.lat() + ',' + pickupAuto.getPlace().geometry.location.lng();
+        });
+        google.maps.event.addListener(destinationAuto, 'place_changed', function() {
+            $scope.booking.destination = destinationAuto.getPlace().formatted_address;
+        });
+        $('.pac-container').css('z-index', 9999);
+      }, 1000)
+    );
+
+    
     $scope.ok = function (result) {
     
         //All Mandatory Fields Populated??
@@ -1100,7 +1143,7 @@ angular.module('hnpApp').controller('NewBookingController',
                } else {
                   $scope.booking.status = 'Scheduled';
                }
-               $scope.booking.lastKnownLocation = '';
+               //$scope.booking.lastKnownLocation = '';
               // 0. Check if Customer is present
               if($scope.customer.mobile != null && $scope.customer.mobile != ''){
                   myCust.findOne({filter: {where : {cell: $scope.customer.mobile}}}, function(cust, status){

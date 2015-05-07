@@ -3,50 +3,47 @@ angular.module('hnpApp').controller('newBookingController',
     'use strict';
     
     //Initialize the Screen
-    
     var userId = ''; 
-   var today = new Date();
-   $scope.popularDestination = [
-      'Ahmedabad',
-      'Surat',
-      'Vadodara',
-      'Rajkot',
-      'Bhavnagar',
-      'Jamnagar',
-      'Junagadh',
-      'Gandhinagar',
-      'Mahesana',
-      'Morbi',
-      'Surendranagar',
-      'Gandhidham',
-      'Veraval',
-      'Navsari',
-      'Bharuch',
-      'Anand',
-      'Porbandar',
-      'Godhra',
-      'Botad',
-      'Sidhpur'
-    ];
-    
+    var today = new Date();
     var newBooking = {};
     newBooking.pickupAddress = '';
-    //newBooking.pickupDate = utilityService.formatDate(today);
     newBooking.pickupDate = today;
     newBooking.destination = '';
-    //newBooking.dropOffDate = utilityService.formatDate(today);
     newBooking.dropingOffDate = today;
     newBooking.carId = 1;
     $scope.newBooking = newBooking;
     
-    //Functions
+    var pickupAuto = new google.maps.places.Autocomplete(
+        (document.getElementById('inp-pickup-address')),
+        { types: ['geocode'] }
+    );
+    var destinationAuto = new google.maps.places.Autocomplete(
+        (document.getElementById('inp-destination')),
+        { types: ['geocode'] }
+    );
+    google.maps.event.addListener(pickupAuto, 'place_changed', function() {
+        $scope.newBooking.pickupAddress = pickupAuto.getPlace().formatted_address;
+        $scope.newBooking.lastKnownLocation = pickupAuto.getPlace().geometry.location.lat() + ',' + pickupAuto.getPlace().geometry.location.lng();
+    });
+    google.maps.event.addListener(destinationAuto, 'place_changed', function() {
+        $scope.newBooking.destination = destinationAuto.getPlace().formatted_address;
+    });
     
-    $scope.suggestDestination = function(){
-      $('#inp-destination').autocomplete({
-        source: $scope.popularDestination
-      });
+    $scope.geolocate = function() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+          var geolocation = new google.maps.LatLng(
+              position.coords.latitude, position.coords.longitude);
+          var circle = new google.maps.Circle({
+            center: geolocation,
+            radius: position.coords.accuracy
+          });
+          autocomplete.setBounds(circle.getBounds());
+        });
+      }
     };
     
+    //Functions
     var showError = function(error){
       if(error.data != null && error.data !== undefined 
           && error.data.error != null && error.data.error !== undefined
@@ -71,7 +68,7 @@ angular.module('hnpApp').controller('newBookingController',
           $scope.newBooking.userId = userId;
           $scope.newBooking.eventDate = pickupDateInt;
           $scope.newBooking.dropOffDate = dropoffDateInt;
-          
+          console.log($scope.newBooking);
           myEvent.create($scope.newBooking, function(createdEvent, status){
               $scope.message = 'New Booking Created Successfully';
               $scope.newBooking.pickupAddress = '';
@@ -85,7 +82,7 @@ angular.module('hnpApp').controller('newBookingController',
               $scope.newBooking.userId = data.id;
               $scope.newBooking.eventDate = pickupDateInt;
               $scope.newBooking.dropOffDate = dropoffDateInt;
-              
+              console.log($scope.newBooking);
               myEvent.create($scope.newBooking, function(createdEvent, status){
                   $scope.message = 'New Booking Created Successfully';
                   $scope.newBooking.pickupAddress = '';
