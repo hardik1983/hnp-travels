@@ -5,7 +5,7 @@ var app = module.exports = loopback();
 var multipart = require('connect-multiparty');
 var fs = require('fs');
 
-var tmpPath = 'C:/Hardik/Projects/tmp/hnp';
+var tmpPath = '/TEMPDIRLOC/hnp';
 var openConnections = [];
 
 app.middleware('initial', bodyParser.urlencoded({ extended: true }));
@@ -63,7 +63,7 @@ boot(app, __dirname, function(err) {
   app.post('/img/drivers', function (req, res, next) {
       var file = req.files.file;
       var fields = req.fields;
-      var baseDir = 'C:/Hardik/Sandboxes/Git/hnp-travels/node-server/client/img/drivers/';
+      var baseDir = 'PROJECTLOC/client/img/drivers/';
       var driverName = req.body.driverName;
       
       var profilePic = baseDir + driverName + '.jpg';
@@ -76,7 +76,7 @@ boot(app, __dirname, function(err) {
   app.post('/img/drivers/dl', function (req, res, next) {
       var file = req.files.file;
       var fields = req.fields;
-      var baseDir = 'C:/Hardik/Sandboxes/Git/hnp-travels/node-server/client/img/drivers/';
+      var baseDir = 'PROJECTLOC/client/img/drivers/';
       var driverName = req.body.driverName;
       
       var profileDl = baseDir + driverName + '-dl.jpg';  
